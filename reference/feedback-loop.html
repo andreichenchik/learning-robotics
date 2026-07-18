@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Шпаргалка: контур обратной связи</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · справочник</p>
+    <h1>Контур обратной связи</h1>
+    <p class="lede">Одна страница для восстановления основной модели управления роботом.</p>
+
+    <section class="card goal">
+      <h2 style="margin-top:0">Пять величин</h2>
+      <p><strong>Цель</strong> <span class="formula-inline">r</span> — желаемое состояние.</p>
+      <p><strong>Состояние</strong> <span class="formula-inline">x</span> — то, что сейчас происходит с системой.</p>
+      <p><strong>Измерение</strong> <span class="formula-inline">y</span> — доступная сенсору информация о состоянии.</p>
+      <p><strong>Ошибка</strong> <span class="formula-inline">e = r − y</span> — расхождение цели и измерения.</p>
+      <p><strong>Команда</strong> <span class="formula-inline">u</span> — воздействие контроллера на систему.</p>
+    </section>
+
+    <div class="loop" aria-label="Цикл управления">
+      <div><strong>Измерить<br>y</strong></div>
+      <div><strong>Сравнить<br>e = r − y</strong></div>
+      <div><strong>Вычислить<br>u</strong></div>
+      <div><strong>Воздействовать<br>x меняется</strong></div>
+    </div>
+
+    <h2>Простейший контроллер</h2>
+    <div class="formula">u = Kₚ · (r − y)</div>
+    <p>Знак ошибки задаёт направление коррекции. Модуль ошибки и коэффициент <span class="formula-inline">Kₚ</span> задают силу команды. Ограничения привода обычно добавляют как <span class="formula-inline">u = clamp(Kₚe, −uₘₐₓ, uₘₐₓ)</span>.</p>
+
+    <h2>Три вопроса к любому контуру</h2>
+    <ol class="steps">
+      <li>Что является состоянием и что на самом деле измеряет сенсор?</li>
+      <li>Как команда изменяет состояние во времени?</li>
+      <li>Вернётся ли система после возмущения и какой ценой?</li>
+    </ol>
+
+    <section class="card note">
+      <strong>Не путать:</strong> симулятор знает истинное состояние, реальный робот — почти никогда. Между <span class="formula-inline">x</span> и <span class="formula-inline">y</span> позже появятся шум, задержка и оценивание состояния.
+    </section>
+
+    <footer>
+      Связанный урок: <a href="../lessons/0001-robot-as-feedback-loop.html">Робот как контур обратной связи</a>.
+    </footer>
+  </main>
+</body>
+</html>
