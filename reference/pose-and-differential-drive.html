@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Шпаргалка: поза differential-drive робота</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=3">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · справочник</p>
+    <h1>Поза и differential drive</h1>
+    <p class="lede">Минимальная геометрическая модель двухколёсного робота на плоскости.</p>
+
+    <section class="card goal">
+      <h2 style="margin-top:0">Поза</h2>
+      <div class="formula">q = (x, y, θ)</div>
+      <p><span class="formula-inline">x,y</span> задают положение середины оси колёс в мировой системе координат. <span class="formula-inline">θ</span> задаёт направление вперёд.</p>
+    </section>
+
+    <h2>Дискретная кинематика</h2>
+    <div class="formula">xₖ₊₁ = xₖ + Δt · vₖ cos θₖ<br>yₖ₊₁ = yₖ + Δt · vₖ sin θₖ<br>θₖ₊₁ = wrap(θₖ + Δt · ωₖ)</div>
+    <p><span class="formula-inline">v</span> — скорость вперёд, <span class="formula-inline">ω</span> — скорость поворота. Независимой боковой команды нет.</p>
+
+    <h2>От шасси к колёсам</h2>
+    <div class="formula">φ̇L = (v − Lω/2) / r<br>φ̇R = (v + Lω/2) / r</div>
+    <p><span class="formula-inline">r</span> — радиус колеса, <span class="formula-inline">L</span> — расстояние между колёсами.</p>
+
+    <div class="rule-grid">
+      <div><strong>v ≠ 0, ω = 0</strong>Прямая.</div>
+      <div><strong>v = 0, ω ≠ 0</strong>Вращение на месте.</div>
+      <div><strong>v ≠ 0, ω ≠ 0</strong>Дуга.</div>
+    </div>
+
+    <section class="card note">
+      <strong>Граница модели.</strong> Кинематика предполагает отсутствие бокового скольжения и мгновенное выполнение скоростей. Моторы, масса, сцепление и одометрическая ошибка появятся позже.
+    </section>
+
+    <footer>
+      Связанный урок: <a href="../lessons/0003-first-robot-in-2d.html">Первый робот в 2D</a>.
+    </footer>
+  </main>
+</body>
+</html>

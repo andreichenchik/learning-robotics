@@ -114,6 +114,7 @@ code, .formula { font-family: "SFMono-Regular", Consolas, monospace; }
   border-radius: 14px;
   background: #eef3ed;
 }
+.simulator canvas.pose-canvas { height: 420px; touch-action: none; cursor: crosshair; }
 
 .controls {
   display: grid;
@@ -148,6 +149,7 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
 }
 .readout div { padding: .7rem; border-radius: 10px; background: var(--green-soft); text-align: center; }
 .readout strong { display: block; font-size: 1.15rem; }
+.readout.pose-readout { grid-template-columns: repeat(4, 1fr); }
 
 .preset-grid {
   display: grid;
@@ -190,7 +192,7 @@ footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line
   .loop { grid-template-columns: 1fr 1fr; }
   .loop div:nth-child(2)::after { content: "↓"; right: 50%; bottom: -.95rem; top: auto; }
   .loop div:nth-child(3)::after { content: "←"; right: auto; left: -.7rem; }
-  .controls, .readout { grid-template-columns: 1fr; }
+  .controls, .readout, .readout.pose-readout { grid-template-columns: 1fr; }
   .preset-grid, .rule-grid { grid-template-columns: 1fr; }
 }
 
