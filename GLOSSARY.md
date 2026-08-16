@@ -35,3 +35,7 @@ _Avoid_: Sensor error, sensor noise
 **Covariance matrix**:
 A matrix describing the expected spread and linear coupling of state-estimation errors. Diagonal entries are marginal error variances; off-diagonal entries describe how signed errors tend to vary together.
 _Avoid_: The current actual error, a guarantee that the state lies inside an ellipse
+
+**State-transition matrix**:
+A compact map of linear influence from the previous state to the next state. Columns represent previous variables, rows represent next variables, diagonal entries carry each variable forward, and off-diagonal entries couple different variables.
+_Avoid_: A stored trajectory, a table of actual errors
