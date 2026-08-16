@@ -8,7 +8,7 @@
       const result = quiz.querySelector("[data-quiz-result]");
 
       if (!selected) {
-        result.textContent = "Сначала выбери ответ.";
+        result.textContent = quiz.dataset.empty || "Снача выбери ответ.";
         result.className = "quiz-result incorrect";
         return;
       }

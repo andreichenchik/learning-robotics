@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0004: Odometry and Drift</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=4">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0004 · 30 minutes</p>
+    <h1>Odometry and drift</h1>
+    <p class="lede">A robot cannot read its true pose directly. It can, however, measure wheel rotation and repeatedly estimate how its pose changed.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will derive differential-drive odometry, compare an estimated pose with ground truth, and explain why small encoder errors accumulate into drift.
+    </section>
+
+    <h2>1. Truth is not a sensor reading</h2>
+    <p>In a simulator we can inspect the true pose <span class="formula-inline">q=(x,y,θ)</span>. A physical robot does not receive that value for free. Its controller maintains an <strong>estimate</strong>, written <span class="formula-inline">q̂</span>, from available measurements.</p>
+    <div class="loop">
+      <div>Wheel rotation</div>
+      <div>Wheel travel</div>
+      <div>Pose increment</div>
+      <div>New estimate q̂</div>
+    </div>
+    <p><strong>Odometry</strong> is this repeated estimation of chassis motion from wheel motion. It is local: each update starts from the previous estimate, not from an external map.</p>
+
+    <p class="source">Primary source: <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/13-4-odometry/"><em>Modern Robotics, 13.4: Odometry</em></a>.</p>
+
+    <h2>2. From encoder ticks to distance</h2>
+    <p>An encoder measures a wheel's angular increment. With wheel radius <span class="formula-inline">r</span>, angular motion becomes travel along the ground:</p>
+    <div class="formula">ΔsL = r · ΔφL<br>ΔsR = r · ΔφR</div>
+    <p>The odometry update only needs the left and right travel since the previous reading. Absolute tick counts are useful because subtracting consecutive counts produces these increments.</p>
+
+    <h2>3. From wheel travel to chassis motion</h2>
+    <p>The average wheel travel moves the chassis forward. Their difference rotates it:</p>
+    <div class="formula">Δs = (ΔsR + ΔsL) / 2<br>Δθ = (ΔsR − ΔsL) / L</div>
+    <p>Here <span class="formula-inline">L</span> is the track width. If both wheels report the same travel, <span class="formula-inline">Δθ=0</span>. If the right wheel reports more travel, the estimate turns left.</p>
+
+    <h2>4. Integrating the estimate</h2>
+    <p>For a short interval, use the heading halfway through the turn. This midpoint update is more accurate than applying the whole translation at the old heading:</p>
+    <div class="formula">θmid = θ̂ₖ + Δθ/2<br>x̂ₖ₊₁ = x̂ₖ + Δs cos θmid<br>ŷₖ₊₁ = ŷₖ + Δs sin θmid<br>θ̂ₖ₊₁ = wrap(θ̂ₖ + Δθ)</div>
+    <p>The key word is <strong>integrating</strong>: every new estimate depends on the previous estimate. An error is therefore carried into all later updates.</p>
+
+    <h2>5. Interactive lab</h2>
+    <section class="card simulator">
+      <canvas class="pose-canvas" data-odometry-canvas aria-label="Ground truth and odometry estimate on a plane"></canvas>
+      <div class="legend">
+        <span><i class="swatch truth"></i>Ground truth</span>
+        <span><i class="swatch estimate"></i>Odometry estimate</span>
+      </div>
+
+      <div class="controls">
+        <label>
+          Left encoder bias: <output data-left-bias-output>0.0%</output>
+          <input data-left-bias type="range" min="-10" max="10" value="0" step="0.5">
+        </label>
+        <label>
+          Right encoder bias: <output data-right-bias-output>0.0%</output>
+          <input data-right-bias type="range" min="-10" max="10" value="0" step="0.5">
+        </label>
+        <label>
+          Encoder noise: <output data-noise-output>0.0 cm/√m</output>
+          <input data-encoder-noise type="range" min="0" max="4" value="0" step="0.5">
+        </label>
+      </div>
+
+      <div class="preset-grid">
+        <button data-sensors-ideal type="button">Ideal encoders</button>
+        <button data-sensors-bias type="button">Right +5%</button>
+        <button data-sensors-noise type="button">Noisy encoders</button>
+      </div>
+
+      <div class="preset-grid">
+        <button data-route-straight type="button">Run straight</button>
+        <button data-route-circle type="button">Run circle</button>
+        <button data-route-eight type="button">Run figure eight</button>
+      </div>
+
+      <div class="buttons">
+        <button data-odometry-pause class="secondary" type="button">Pause</button>
+        <button data-odometry-reset class="secondary" type="button">Reset</button>
+      </div>
+
+      <div class="readout odometry-readout">
+        <div>True pose<strong data-truth-pose>(-0.90, 0.00, 0°)</strong></div>
+        <div>Estimated pose<strong data-estimated-pose>(-0.90, 0.00, 0°)</strong></div>
+        <div>Position error<strong data-position-error>0.000 m</strong></div>
+        <div>Heading error<strong data-heading-error>0.0°</strong></div>
+        <div>Left measured travel<strong data-left-distance>0.00 m</strong></div>
+        <div>Right measured travel<strong data-right-distance>0.00 m</strong></div>
+      </div>
+      <p class="muted small" data-odometry-status aria-live="polite">Choose a sensor preset and a route.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Select <strong>Ideal encoders</strong>, then run the figure eight. Why do the two paths remain aligned?</li>
+      <li>Select <strong>Right +5%</strong>, then run straight. Which error appears directly in <span class="formula-inline">Δθ</span>, and how does it create position error?</li>
+      <li>Select <strong>Noisy encoders</strong> and run the figure eight. Is the final error guaranteed to cancel because the noise has zero mean?</li>
+    </ol>
+
+    <h2>6. Bias and noise fail differently</h2>
+    <div class="rule-grid">
+      <div><strong>Scale bias</strong>A repeatable proportional error, such as one encoder reporting 5% too much travel.</div>
+      <div><strong>Noise</strong>A varying measurement error whose individual samples may be positive or negative.</div>
+      <div><strong>Drift</strong>The growing pose error produced by integrating imperfect increments.</div>
+    </div>
+    <p>A wheel mismatch first corrupts <span class="formula-inline">Δθ</span>. The wrong heading then rotates every later forward increment in the wrong direction, coupling orientation error into position error.</p>
+
+    <section class="card note">
+      <strong>Model boundary.</strong> This lab changes encoder measurements while keeping true wheel motion ideal. Real robots also slip, skid, deform tyres, encounter uneven floors, and use imperfect wheel radius and track-width calibration.
+    </section>
+
+    <p class="source">Engineering reference: <a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/differential-drive-odometry.html"><em>WPILib: Differential Drive Odometry</em></a>. Its documentation likewise warns that encoder- and gyro-based pose estimates drift over time.</p>
+
+    <h2>7. Check from memory</h2>
+    <form class="card quiz" data-quiz data-correct="estimate" data-empty="Choose an answer first." data-success="Correct: odometry integrates measured motion into a pose estimate." data-retry="Distinguish the inaccessible true pose from the robot's internal estimate.">
+      <fieldset>
+        <legend>What does wheel odometry provide?</legend>
+        <label><input type="radio" name="q1" value="truth"> The exact physical pose</label>
+        <label><input type="radio" name="q1" value="estimate"> An integrated pose estimate</label>
+        <label><input type="radio" name="q1" value="map"> A complete environment map</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <form class="card quiz" data-quiz data-correct="bias" data-empty="Choose an answer first." data-success="Correct: persistent wheel mismatch produces systematic curvature." data-retry="Ask which error keeps pushing the estimate in the same direction.">
+      <fieldset>
+        <legend>Which error most directly produces repeatable curvature on a commanded straight path?</legend>
+        <label><input type="radio" name="q2" value="bias"> Unequal encoder scale bias</label>
+        <label><input type="radio" name="q2" value="noise"> Independent zero-mean noise</label>
+        <label><input type="radio" name="q2" value="step"> A smaller integration step</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>8. Your short report</h2>
+    <ol class="steps">
+      <li>Why does ideal odometry exactly match ground truth in this simulation, but not necessarily on a physical robot?</li>
+      <li>With a +5% right encoder bias, why does a heading error eventually create a large position error?</li>
+      <li>Why can zero-mean encoder noise still leave a nonzero final pose error?</li>
+    </ol>
+    <p>Answer in English or Russian through annotations or chat. After these ideas are confirmed, we will add an external pose measurement and use it to correct odometry drift.</p>
+
+    <section class="card">
+      <strong>For review:</strong> keep the <a href="../reference/odometry-and-drift.html">odometry and drift cheat sheet</a> nearby.
+    </section>
+
+    <footer>
+      Primary sources: Lynch &amp; Park, <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/13-4-odometry/"><em>Modern Robotics: Odometry</em></a>, and <a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/differential-drive-odometry.html"><em>WPILib: Differential Drive Odometry</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/odometry.js"></script>
+  <script src="../assets/odometry-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: Odometry and drift</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=4">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>Odometry and drift</h1>
+    <p class="lede">Estimate differential-drive pose from incremental wheel motion.</p>
+
+    <h2>Measurement</h2>
+    <div class="formula">ΔsL = r · ΔφL<br>ΔsR = r · ΔφR</div>
+    <p>Convert encoder rotation increments into left and right wheel travel.</p>
+
+    <h2>Chassis increment</h2>
+    <div class="formula">Δs = (ΔsR + ΔsL) / 2<br>Δθ = (ΔsR − ΔsL) / L</div>
+    <p>The average creates forward motion; the difference creates rotation.</p>
+
+    <h2>Midpoint integration</h2>
+    <div class="formula">θmid = θ̂ + Δθ/2<br>x̂' = x̂ + Δs cos θmid<br>ŷ' = ŷ + Δs sin θmid<br>θ̂' = wrap(θ̂ + Δθ)</div>
+
+    <div class="rule-grid">
+      <div><strong>Bias</strong>Persistent error with a consistent direction.</div>
+      <div><strong>Noise</strong>Sample-to-sample measurement variation.</div>
+      <div><strong>Drift</strong>Accumulated pose error after repeated integration.</div>
+    </div>
+
+    <section class="card note">
+      <strong>Remember.</strong> Odometry estimates change in pose; it does not observe absolute pose. External measurements are needed to correct accumulated drift.
+    </section>
+
+    <footer>
+      Related lesson: <a href="../lessons/0004-odometry-and-drift.html">Odometry and drift</a>.
+    </footer>
+  </main>
+</body>
+</html>
