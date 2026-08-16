@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0011: EKF Pose Localization</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=11">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0011 · 35 minutes</p>
+    <h1>Localization is the same loop over pose</h1>
+    <p class="lede">Odometry predicts a robot's planar pose. A camera occasionally anchors that pose to the field. The extended Kalman filter keeps the familiar predict–correct loop when motion is nonlinear.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will predict one pose <span class="formula-inline">(x,y,θ)</span>, explain how heading uncertainty spreads into position, and use a camera pose measurement to shrink the covariance ellipse.
+    </section>
+
+    <h2>1. Retrieve the loop</h2>
+    <form class="card quiz" data-quiz data-correct="posterior" data-empty="Choose an answer first." data-success="Correct: the corrected state and covariance seed the next prediction." data-retry="Recall the recursive memory of the complete Kalman filter.">
+      <fieldset>
+        <legend>What starts the next prediction?</legend>
+        <label><input type="radio" name="q1" value="posterior"> Corrected state and covariance</label>
+        <label><input type="radio" name="q1" value="measurement"> Latest sensor reading alone</label>
+        <label><input type="radio" name="q1" value="history"> Complete stored error history</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>2. What localization estimates</h2>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>x position</span><span>y position</span><span>heading θ</span></span></span>
+        <span>P = covariance of pose error</span>
+      </div>
+    </div>
+    <p><strong>Localization</strong> estimates the robot's pose from its previous belief, executed motion, and sensor observations. We do not replay the entire history: the corrected pair <span class="formula-inline">(x̂⁺,P⁺)</span> summarizes it for the next cycle.</p>
+
+    <div class="loop">
+      <div>Pose belief<br><span class="formula-inline">x̂⁺, P⁺</span></div>
+      <div>Wheel odometry<br><span class="formula-inline">u=(d,Δθ)</span></div>
+      <div>Predict pose<br><span class="formula-inline">x̂⁻, P⁻</span></div>
+      <div>Camera corrects<br><span class="formula-inline">x̂⁺, P⁺</span></div>
+    </div>
+    <p class="source">Dellaert and Hutchinson define localization as recursively estimating robot position from the history of actions and observations; see <a href="https://www.roboticsbook.org/S44_logistics_perception.html"><em>Introduction to Robotics and Perception, 4.4: Localization</em></a>.</p>
+
+    <h2>3. One concrete curved motion</h2>
+    <p>The robot begins at <span class="formula-inline">(0 m,0 m,0°)</span>. Odometry reports a <span class="formula-inline">1 m</span> movement while turning <span class="formula-inline">30°</span>. Using the heading halfway through the arc:</p>
+    <div class="formula">φ = θ + Δθ/2<br>x′ = x + d cos φ<br>y′ = y + d sin φ<br>θ′ = wrap(θ + Δθ)</div>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂⁻ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>0.966 m</span><span>0.259 m</span><span>30°</span></span></span>
+      </div>
+    </div>
+    <p>The same forward distance produces different world-frame changes at different headings. The state update contains <span class="formula-inline">sin</span> and <span class="formula-inline">cos</span>, so there is no single constant matrix <span class="formula-inline">F</span> that works everywhere.</p>
+
+    <h2>4. “Extended” means linearize nearby errors</h2>
+    <p>The EKF applies the nonlinear motion function <span class="formula-inline">f</span> directly to the mean. For covariance, it recomputes a local influence matrix—the Jacobian—at the current pose:</p>
+    <div class="formula">x̂⁻ = f(x̂⁺,u)<br>P⁻ = F P⁺ Fᵀ + Q<br><br>F = ∂f/∂x evaluated at x̂⁺</div>
+    <div class="formula">
+      <div class="equation">
+        <span>F =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 3"><span>1</span><span>0</span><span>−d sin φ</span><span>0</span><span>1</span><span>d cos φ</span><span>0</span><span>0</span><span>1</span></span></span>
+      </div>
+    </div>
+    <section class="card note">
+      <strong>Read one column physically.</strong> The third column says how a small heading error changes the next <span class="formula-inline">x</span>, <span class="formula-inline">y</span>, and <span class="formula-inline">θ</span>. After moving, “pointing slightly wrong” becomes “ending at a slightly different position.”
+    </section>
+
+    <h2>5. Predict pose uncertainty</h2>
+    <p>Start with position standard deviation <span class="formula-inline">0.1 m</span> and heading standard deviation <span class="formula-inline">5°</span>. Add process noise of <span class="formula-inline">0.05 m</span> and <span class="formula-inline">2°</span> for this motion. The prediction gives:</p>
+    <div class="formula">
+      <div class="equation">
+        <span>P⁻ ≈</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 3"><span>0.0130</span><span>−0.0019</span><span>−0.0020</span><span>−0.0019</span><span>0.0196</span><span>0.0074</span><span>−0.0020</span><span>0.0074</span><span>0.0088</span></span></span>
+      </div>
+    </div>
+    <p>The <span class="formula-inline">y</span> variance is larger than the <span class="formula-inline">x</span> variance because, at this heading, small direction errors mostly move the endpoint sideways. The off-diagonal values record the new coupling among position and heading errors.</p>
+
+    <h2>6. A camera anchors pose to the field</h2>
+    <p>Suppose known field tags let the camera report a noisy world-frame pose:</p>
+    <div class="formula">
+      <div class="equation">
+        <span>z =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>1.020 m</span><span>0.200 m</span><span>28°</span></span></span>
+        <span>H = I</span>
+      </div>
+    </div>
+    <p>Because the sensor directly reports all three state variables, <span class="formula-inline">H=I</span>. The correction is the same Kalman correction as before, except the heading innovation must use the shortest wrapped angle:</p>
+    <div class="formula">y = [zx−x̂⁻, zy−ŷ⁻, wrap(zθ−θ̂⁻)]ᵀ<br>S = P⁻ + R<br>K = P⁻S⁻¹<br>x̂⁺ = x̂⁻ + Ky</div>
+    <p>For camera uncertainty <span class="formula-inline">σxy=0.15 m</span> and <span class="formula-inline">σθ=8°</span>, the corrected pose is approximately <span class="formula-inline">(0.988 m,0.227 m,28.9°)</span>. Its position variances fall from <span class="formula-inline">(0.0130,0.0196)</span> to <span class="formula-inline">(0.0082,0.0099)</span>.</p>
+
+    <h2>7. Interactive localization loop</h2>
+    <p>The robot drives a circle. Biased odometry predicts every step; a camera pose arrives every fourth step. The blue ellipse is the EKF's current <span class="formula-inline">2σ</span> position region.</p>
+    <section class="card simulator">
+      <canvas class="ekf-localization-canvas" data-ekf-localization-canvas aria-label="True, odometry-only, and EKF robot trajectories with camera measurements and a covariance ellipse"></canvas>
+      <div class="legend">
+        <span><i class="swatch truth"></i>Ground truth</span>
+        <span><i class="swatch dead-reckoning"></i>Odometry only</span>
+        <span><i class="swatch ekf-estimate"></i>EKF estimate</span>
+        <span><i class="swatch ekf-ellipse"></i>EKF 2σ ellipse</span>
+        <span><i class="mean-dot"></i>Camera pose</span>
+      </div>
+
+      <div class="preset-grid scenario-grid">
+        <button data-ekf-precise type="button">Precise camera</button>
+        <button data-ekf-noisy type="button">Noisy camera</button>
+        <button data-ekf-off type="button">Camera disabled</button>
+      </div>
+
+      <div class="buttons">
+        <button data-ekf-step-button type="button">Advance one step</button>
+        <button data-ekf-camera-button type="button">Advance to camera</button>
+        <button data-ekf-run-button type="button">Run 16 steps</button>
+        <button data-ekf-reset class="secondary" type="button">Reset</button>
+      </div>
+
+      <div class="readout ekf-localization-readout">
+        <div>Step · event<strong data-ekf-step>0 · Initial posterior</strong></div>
+        <div>True pose<strong data-ekf-truth>(2.20, 1.00, 11°)</strong></div>
+        <div>EKF pose<strong data-ekf-estimate>(2.20, 1.00, 11°)</strong></div>
+        <div>Position error: odom → EKF<strong data-ekf-errors>0.000 → 0.000 m</strong></div>
+        <div>Current 2σ ellipse axes<strong data-ekf-ellipse>0.04 × 0.04 m</strong></div>
+        <div>Current (σx, σy)<strong data-ekf-axis-sigmas>(0.020, 0.020) m</strong></div>
+        <div>Current heading σ<strong data-ekf-heading-sigma>3.0°</strong></div>
+        <div>Camera model<strong data-ekf-camera-scenario>Precise camera</strong></div>
+        <div>Last camera major axis: prior → posterior<strong data-ekf-last-shrink>—</strong></div>
+        <div>Last gain diag (Kx, Ky, Kθ)<strong data-ekf-last-gain>—</strong></div>
+      </div>
+
+      <div class="formula pose-covariance-readout" aria-label="Current planar pose covariance matrix">
+        <div class="equation">
+          <span>P =</span>
+          <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 3"><span data-ekf-pxx>0.0004</span><span data-ekf-pxy-a>0.0000</span><span data-ekf-pxt-a>0.0000</span><span data-ekf-pxy-b>0.0000</span><span data-ekf-pyy>0.0004</span><span data-ekf-pyt-a>0.0000</span><span data-ekf-pxt-b>0.0000</span><span data-ekf-pyt-b>0.0000</span><span data-ekf-ptt>0.0027</span></span></span>
+          <span class="muted small">2σ major: <span data-ekf-current-major>0.04</span> m</span>
+        </div>
+      </div>
+      <p class="muted small" data-ekf-localization-status aria-live="polite">Advance to the first camera update and inspect the ellipse before and after correction.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Reset and press <strong>Advance one step</strong>. Compare the two numbers in <strong>Current (σx, σy)</strong>. Explain why a curved forward move lets heading uncertainty affect position unevenly.</li>
+      <li>Select <strong>Camera disabled</strong> and press <strong>Run 16 steps</strong>. Compare the two numbers in <strong>Position error: odom → EKF</strong>. Verify that without correction the EKF mean follows biased odometry, even though it honestly reports growing uncertainty.</li>
+      <li>Select <strong>Precise camera</strong>, press <strong>Advance to camera</strong>, and read <strong>Last camera major axis: prior → posterior</strong>. Verify that the value after the arrow is smaller.</li>
+      <li>Record <strong>Last gain diag</strong> for the precise camera. Reset with <strong>Noisy camera</strong>, advance to camera, and compare the same three values. Verify that the noisier camera produces smaller gains.</li>
+      <li>With <strong>Precise camera</strong>, run 16 steps. Compare odometry-only and EKF position errors. Identify the repeating ellipse pattern: prediction expands it; camera correction contracts it.</li>
+    </ol>
+
+    <h2>8. The EKF localization algorithm</h2>
+    <div class="formula">repeat for each odometry increment u:<br>  x̂⁻ = f(x̂⁺, u)<br>  F = Jacobian of f at x̂⁺ and u<br>  P⁻ = F P⁺ Fᵀ + Q<br><br>  if camera pose z arrives:<br>    y = z − x̂⁻; wrap yθ<br>    S = P⁻ + R<br>    K = P⁻S⁻¹<br>    x̂⁺ = x̂⁻ + Ky; wrap θ̂⁺<br>    P⁺ = (I − K)P⁻<br>  else:<br>    x̂⁺, P⁺ = x̂⁻, P⁻</div>
+
+    <h2>9. Model boundary</h2>
+    <p>This lesson assumes the initial pose is roughly known, the field map and tag poses are known, and one Gaussian is a useful local description. The EKF can fail after a large initialization error, a false camera pose, unmodeled bias, or delayed measurements. If the robot could occupy several widely separated places, a grid or particle filter can represent that multimodal belief; if the map is also unknown, the problem becomes SLAM.</p>
+    <p class="source">For a practical pose-estimator architecture, see <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html"><em>WPILib: Pose Estimators</em></a>: encoder and gyro updates arrive periodically, while field-relative vision poses are added occasionally with tunable measurement uncertainty and timestamps.</p>
+
+    <h2>10. Check from memory</h2>
+    <form class="card quiz" data-quiz data-correct="errors" data-empty="Choose an answer first." data-success="Correct: F maps nearby state errors through the local motion geometry." data-retry="Separate the nonlinear mean update from local covariance propagation.">
+      <fieldset>
+        <legend>What does the Jacobian F do?</legend>
+        <label><input type="radio" name="q2" value="errors"> Propagates nearby state errors</label>
+        <label><input type="radio" name="q2" value="frames"> Stores every camera frame</label>
+        <label><input type="radio" name="q2" value="route"> Chooses the robot route</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <form class="card quiz" data-quiz data-correct="shortest" data-empty="Choose an answer first." data-success="Correct: angle innovations must describe the shortest signed rotation." data-retry="Remember that +179° and −179° are neighboring headings.">
+      <fieldset>
+        <legend>Why wrap the heading innovation?</legend>
+        <label><input type="radio" name="q3" value="shortest"> Use the shortest angular difference</label>
+        <label><input type="radio" name="q3" value="positive"> Make every angle always positive</label>
+        <label><input type="radio" name="q3" value="metres"> Convert radians into metres directly</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>11. Your short report</h2>
+    <ol class="steps">
+      <li>Why can the same forward odometry increment change world <span class="formula-inline">x</span> and <span class="formula-inline">y</span> differently at different headings?</li>
+      <li>What is applied to the mean during EKF prediction, and what is applied to covariance?</li>
+      <li>Why does heading uncertainty become position uncertainty after motion, and why does a camera pose reduce both?</li>
+    </ol>
+    <p>Answer in English or Russian through chat. Ask me about any symbol, matrix entry, or simulator readout that remains unclear. After this report, the five-lesson estimation sequence is complete and the next work will be learner-written code.</p>
+
+    <section class="card">
+      <strong>For review:</strong> use the <a href="../reference/ekf-pose-localization.html">EKF pose localization cheat sheet</a>. Revisit <a href="0010-the-complete-linear-kalman-filter.html">the complete linear filter</a> for the recursive loop or <a href="0004-odometry-and-drift.html">odometry and drift</a> for the pose motion model.
+    </section>
+
+    <footer>
+      Primary sources: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S44_logistics_perception.html"><em>Introduction to Robotics and Perception: Localization</em></a>; <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html"><em>WPILib: Pose Estimators</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/odometry.js"></script>
+  <script src="../assets/ekf-pose-localization.js"></script>
+  <script src="../assets/ekf-localization-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

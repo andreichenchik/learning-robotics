@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: EKF Pose Localization</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=11">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>EKF pose localization</h1>
+    <p class="lede">Carry one local Gaussian belief over planar pose through nonlinear odometry and occasional world-frame pose measurements.</p>
+
+    <h2>Stored belief</h2>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>x</span><span>y</span><span>θ</span></span></span>
+        <span>P = covariance of pose error</span>
+      </div>
+    </div>
+    <p>The corrected pair <span class="formula-inline">(x̂⁺,P⁺)</span> is the recursive memory. It summarizes previous actions and observations.</p>
+
+    <h2>Nonlinear odometry prediction</h2>
+    <div class="formula">φ = θ + Δθ/2<br>x′ = x + d cos φ<br>y′ = y + d sin φ<br>θ′ = wrap(θ + Δθ)</div>
+    <div class="formula">x̂⁻ = f(x̂⁺,u)<br>P⁻ = F P⁺ Fᵀ + Q</div>
+    <div class="formula">
+      <div class="equation">
+        <span>F = ∂f/∂x =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 3"><span>1</span><span>0</span><span>−d sin φ</span><span>0</span><span>1</span><span>d cos φ</span><span>0</span><span>0</span><span>1</span></span></span>
+      </div>
+    </div>
+    <div class="rule-grid">
+      <div><strong>f</strong>Moves the mean through the nonlinear geometry.</div>
+      <div><strong>F</strong>Moves nearby errors through the local geometry.</div>
+      <div><strong>Q</strong>Adds uncertainty from imperfect motion.</div>
+    </div>
+
+    <h2>World-frame pose correction</h2>
+    <p>For a camera that directly reports <span class="formula-inline">z=(zx,zy,zθ)</span>, the observation model is <span class="formula-inline">H=I</span>:</p>
+    <div class="formula">y = z − x̂⁻; wrap yθ<br>S = P⁻ + R<br>K = P⁻S⁻¹<br>x̂⁺ = x̂⁻ + Ky; wrap θ̂⁺<br>P⁺ = (I − K)P⁻</div>
+    <div class="rule-grid">
+      <div><strong>R</strong>Camera pose-error covariance.</div>
+      <div><strong>K</strong>Trust by state direction.</div>
+      <div><strong>P⁺</strong>Reduced local uncertainty.</div>
+    </div>
+
+    <h2>Physical reading of covariance</h2>
+    <ul class="steps">
+      <li><span class="formula-inline">Pxx, Pyy, Pθθ</span>: marginal error variances for the pose coordinates.</li>
+      <li><span class="formula-inline">Pxθ, Pyθ</span>: coupling between position and heading errors.</li>
+      <li>The top-left <span class="formula-inline">2×2</span> block produces the position covariance ellipse.</li>
+      <li>After motion, heading uncertainty spreads into position through the third column of <span class="formula-inline">F</span>.</li>
+    </ul>
+
+    <section class="card note">
+      <strong>Always wrap angular differences.</strong> Compute heading innovation with the shortest signed difference, then wrap the corrected heading again.
+    </section>
+
+    <h2>When this model is appropriate</h2>
+    <div class="rule-grid">
+      <div><strong>Use it</strong>Rough initial pose, locally smooth motion, approximately Gaussian errors.</div>
+      <div><strong>Validate it</strong>Outliers, latency, biases, and evidence for chosen Q and R.</div>
+      <div><strong>Change method</strong>Several distant pose hypotheses or an unknown map.</div>
+    </div>
+
+    <footer>
+      Related lessons: <a href="../lessons/0011-ekf-pose-localization.html">Localization is the same loop over pose</a>, <a href="../lessons/0010-the-complete-linear-kalman-filter.html">The filter is a loop</a>, and <a href="../lessons/0004-odometry-and-drift.html">Odometry accumulates error</a>. Primary sources: <a href="https://www.roboticsbook.org/S44_logistics_perception.html">Dellaert &amp; Hutchinson, Localization</a>; <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html">WPILib, Pose Estimators</a>.
+    </footer>
+  </main>
+</body>
+</html>
