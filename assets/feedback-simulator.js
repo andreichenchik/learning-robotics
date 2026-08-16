@@ -58,7 +58,7 @@
     context.fillStyle = "#8f4e13";
     context.font = "600 14px system-ui";
     context.textAlign = "center";
-    context.fillText("цель r", targetX, 22);
+    context.fillText("target r", targetX, 22);
 
     context.fillStyle = "#176b4d";
     context.beginPath();
@@ -71,7 +71,7 @@
     context.fill();
     context.fillStyle = "#176b4d";
     context.font = "600 14px system-ui";
-    context.fillText("позиция x", robotX, trackY + 42);
+    context.fillText("position x", robotX, trackY + 42);
   }
 
   function updateReadout() {
@@ -108,8 +108,8 @@
         model.position = model.target;
         model.command = 0;
         model.running = false;
-        runButton.textContent = "Запустить";
-        status.textContent = "Цель достигнута: ошибка практически равна нулю.";
+        runButton.textContent = "Run";
+        status.textContent = "Target reached: the error is effectively zero.";
       }
     }
 
@@ -124,33 +124,33 @@
 
   targetInput.addEventListener("input", () => {
     model.target = Number(targetInput.value);
-    status.textContent = "Цель изменилась — контроллер видит новую ошибку.";
+    status.textContent = "The target changed, so the controller sees a new error.";
     render();
   });
 
   runButton.addEventListener("click", () => {
     model.running = !model.running;
     model.lastTime = performance.now();
-    runButton.textContent = model.running ? "Пауза" : "Продолжить";
+    runButton.textContent = model.running ? "Pause" : "Continue";
     status.textContent = model.running
-      ? "Контур замкнут: команда пересчитывается на каждом шаге."
-      : "Симуляция приостановлена.";
+      ? "The loop is closed: the command is recomputed at every step."
+      : "The simulation is paused.";
   });
 
   resetButton.addEventListener("click", () => {
     Object.assign(model, initial, { command: 0, running: false, lastTime: 0 });
     gainInput.value = String(initial.gain);
     targetInput.value = String(initial.target);
-    runButton.textContent = "Запустить";
-    status.textContent = "Исходное состояние восстановлено.";
+    runButton.textContent = "Run";
+    status.textContent = "The initial state has been restored.";
     render();
   });
 
   disturbButton.addEventListener("click", () => {
     model.position = RobotControl.clamp(model.position - 0.22, 0, 1);
     status.textContent = model.running
-      ? "Возмущение изменило позицию; наблюдай, как контур исправляет ошибку."
-      : "Возмущение изменило позицию. Запусти контур, чтобы робот восстановился.";
+      ? "The disturbance changed the position; watch the loop correct the error."
+      : "The disturbance changed the position. Run the loop so the robot can recover.";
     render();
   });
 

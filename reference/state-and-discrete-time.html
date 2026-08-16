@@ -1,41 +1,41 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Шпаргалка: состояние и дискретное время</title>
+  <title>Reference: state and discrete time</title>
   <link rel="stylesheet" href="../assets/styles.css?v=2">
 </head>
 <body>
   <main>
-    <p class="eyebrow">Robotics · справочник</p>
-    <h1>Состояние и дискретное время</h1>
-    <p class="lede">Минимальная модель цикла, который робот действительно исполняет на компьютере.</p>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>State and discrete time</h1>
+    <p class="lede">A minimal model of the loop that a robot actually executes on a computer.</p>
 
     <section class="card goal">
-      <h2 style="margin-top:0">Состояние</h2>
-      <p><strong>Состояние x</strong> — минимальная информация о настоящем, которой вместе с будущими входами достаточно для предсказания будущего модели.</p>
-      <p>Для точки с командой скорости достаточно позиции. Для свободно движущегося тела обычно нужны позиция и скорость: одинаковая позиция при разных скоростях ведёт к разному будущему.</p>
+      <h2 style="margin-top:0">State</h2>
+      <p><strong>State x</strong> is the minimal information about the present that, together with future inputs, is sufficient to predict the model's future.</p>
+      <p>Position is enough for a point controlled by velocity. A freely moving body usually needs position and velocity: the same position at different velocities leads to different futures.</p>
     </section>
 
-    <h2>Один дискретный переход</h2>
+    <h2>One discrete transition</h2>
     <div class="formula">yₖ = xₖ₋d<br>eₖ = r − yₖ<br>uₖ = Kₚeₖ<br>xₖ₊₁ = xₖ + Δt · uₖ</div>
-    <p><span class="formula-inline">k</span> — номер шага, <span class="formula-inline">Δt</span> — длительность шага, <span class="formula-inline">d</span> — задержка измерения в шагах. Команда <span class="formula-inline">uₖ</span> удерживается между двумя обновлениями.</p>
+    <p><span class="formula-inline">k</span> is the step number, <span class="formula-inline">Δt</span> is the step duration, and <span class="formula-inline">d</span> is the measurement delay in steps. Command <span class="formula-inline">uₖ</span> is held between updates.</p>
 
-    <h2>Без задержки</h2>
+    <h2>Without delay</h2>
     <div class="formula">eₖ₊₁ = (1 − KₚΔt)eₖ</div>
     <div class="rule-grid">
-      <div><strong>0 &lt; KₚΔt ≤ 1</strong>Подход без перелёта.</div>
-      <div><strong>1 &lt; KₚΔt &lt; 2</strong>Перелёты затухают.</div>
-      <div><strong>KₚΔt ≥ 2</strong>Ошибка не затухает.</div>
+      <div><strong>0 &lt; KₚΔt ≤ 1</strong>Convergence without overshoot.</div>
+      <div><strong>1 &lt; KₚΔt &lt; 2</strong>Overshoots decay.</div>
+      <div><strong>KₚΔt ≥ 2</strong>The error does not decay.</div>
     </div>
 
     <section class="card note">
-      <strong>При задержке эта простая граница больше не достаточна.</strong> Контроллер корректирует прошлое состояние и может продолжать разгон уже после пересечения цели.
+      <strong>With delay, this simple boundary is no longer sufficient.</strong> The controller corrects a past state and can continue accelerating even after crossing the target.
     </section>
 
     <footer>
-      Связанный урок: <a href="../lessons/0002-state-time-and-delay.html">Состояние, время и задержка</a>.
+      Related lesson: <a href="../lessons/0002-state-time-and-delay.html">State, time, and delay</a>.
     </footer>
   </main>
 </body>

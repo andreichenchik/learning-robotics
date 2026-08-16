@@ -1,33 +1,33 @@
 # Robotics Glossary
 
-Канонические термины, понимание которых уже было продемонстрировано в упражнениях.
+Canonical terms whose meaning has already been demonstrated in exercises.
 
 ## Terms
 
-**Пропорциональный контроллер (proportional controller)**:
-Контроллер, команда которого пропорциональна текущей ошибке: `u = Kₚe`.
-_Avoid_: Пропорциональный алгоритм, P-регуляция
+**Proportional controller**:
+A controller whose command is proportional to the current error: `u = Kₚe`.
+_Avoid_: Proportional algorithm, P-regulation
 
-**Замкнутый контур (closed loop)**:
-Система управления, в которой измеренный результат воздействия используется для вычисления следующей команды.
-_Avoid_: Изолированная система, система без внешнего воздействия
+**Closed loop**:
+A control system in which the measured result of an action is used to compute the next command.
+_Avoid_: Isolated system, system without external influence
 
-**Разомкнутое управление (open-loop control)**:
-Управление, при котором фактический результат воздействия не изменяет последующие команды.
-_Avoid_: Остановленный контроллер, сломанная обратная связь
+**Open-loop control**:
+Control in which the actual result of an action does not change subsequent commands.
+_Avoid_: Stopped controller, broken feedback
 
-**Состояние (state)**:
-Минимальный набор переменных о настоящем, которого вместе с будущими входами достаточно для предсказания будущего модели.
-_Avoid_: Все данные системы, полная история
+**State**:
+The minimal set of variables about the present that, together with future inputs, is sufficient to predict the model's future.
+_Avoid_: All system data, full history
 
-**Измерение (measurement)**:
-Доступное контроллеру значение `y`, сообщающее информацию о состоянии `x`; из-за задержки и шума `y` может отличаться от `x`.
-_Avoid_: Реальное состояние, точное состояние
+**Measurement**:
+A value `y` available to the controller that provides information about state `x`; delay and noise can make `y` differ from `x`.
+_Avoid_: True state, exact state
 
-**Шаг времени (time step)**:
-Интервал `Δt` между двумя последовательными обновлениями дискретной модели или контроллера.
-_Avoid_: Номер шага, индекс `k`
+**Time step**:
+The interval `Δt` between two consecutive updates of a discrete model or controller.
+_Avoid_: Step number, index `k`
 
-**Задержка измерения (measurement delay)**:
-Отставание доступного измерения от текущего состояния системы.
-_Avoid_: Ошибка сенсора, шум сенсора
+**Measurement delay**:
+The lag between an available measurement and the system's current state.
+_Avoid_: Sensor error, sensor noise

@@ -1,50 +1,50 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Шпаргалка: контур обратной связи</title>
+  <title>Reference: feedback loop</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
   <main>
-    <p class="eyebrow">Robotics · справочник</p>
-    <h1>Контур обратной связи</h1>
-    <p class="lede">Одна страница для восстановления основной модели управления роботом.</p>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>Feedback loop</h1>
+    <p class="lede">A one-page refresher on the basic model of robot control.</p>
 
     <section class="card goal">
-      <h2 style="margin-top:0">Пять величин</h2>
-      <p><strong>Цель</strong> <span class="formula-inline">r</span> — желаемое состояние.</p>
-      <p><strong>Состояние</strong> <span class="formula-inline">x</span> — то, что сейчас происходит с системой.</p>
-      <p><strong>Измерение</strong> <span class="formula-inline">y</span> — доступная сенсору информация о состоянии.</p>
-      <p><strong>Ошибка</strong> <span class="formula-inline">e = r − y</span> — расхождение цели и измерения.</p>
-      <p><strong>Команда</strong> <span class="formula-inline">u</span> — воздействие контроллера на систему.</p>
+      <h2 style="margin-top:0">Five quantities</h2>
+      <p><strong>Target</strong> <span class="formula-inline">r</span> — the desired state.</p>
+      <p><strong>State</strong> <span class="formula-inline">x</span> — what is currently happening in the system.</p>
+      <p><strong>Measurement</strong> <span class="formula-inline">y</span> — information about the state available to a sensor.</p>
+      <p><strong>Error</strong> <span class="formula-inline">e = r − y</span> — the difference between the target and measurement.</p>
+      <p><strong>Command</strong> <span class="formula-inline">u</span> — the controller's action on the system.</p>
     </section>
 
-    <div class="loop" aria-label="Цикл управления">
-      <div><strong>Измерить<br>y</strong></div>
-      <div><strong>Сравнить<br>e = r − y</strong></div>
-      <div><strong>Вычислить<br>u</strong></div>
-      <div><strong>Воздействовать<br>x меняется</strong></div>
+    <div class="loop" aria-label="Control loop">
+      <div><strong>Measure<br>y</strong></div>
+      <div><strong>Compare<br>e = r − y</strong></div>
+      <div><strong>Compute<br>u</strong></div>
+      <div><strong>Act<br>x changes</strong></div>
     </div>
 
-    <h2>Простейший контроллер</h2>
+    <h2>The simplest controller</h2>
     <div class="formula">u = Kₚ · (r − y)</div>
-    <p>Знак ошибки задаёт направление коррекции. Модуль ошибки и коэффициент <span class="formula-inline">Kₚ</span> задают силу команды. Ограничения привода обычно добавляют как <span class="formula-inline">u = clamp(Kₚe, −uₘₐₓ, uₘₐₓ)</span>.</p>
+    <p>The error's sign determines the direction of correction. The error magnitude and gain <span class="formula-inline">Kₚ</span> determine command strength. Actuator limits are usually added as <span class="formula-inline">u = clamp(Kₚe, −uₘₐₓ, uₘₐₓ)</span>.</p>
 
-    <h2>Три вопроса к любому контуру</h2>
+    <h2>Three questions for any loop</h2>
     <ol class="steps">
-      <li>Что является состоянием и что на самом деле измеряет сенсор?</li>
-      <li>Как команда изменяет состояние во времени?</li>
-      <li>Вернётся ли система после возмущения и какой ценой?</li>
+      <li>What is the state, and what does the sensor actually measure?</li>
+      <li>How does the command change the state over time?</li>
+      <li>Will the system recover after a disturbance, and at what cost?</li>
     </ol>
 
     <section class="card note">
-      <strong>Не путать:</strong> симулятор знает истинное состояние, реальный робот — почти никогда. Между <span class="formula-inline">x</span> и <span class="formula-inline">y</span> позже появятся шум, задержка и оценивание состояния.
+      <strong>Do not confuse these:</strong> a simulator knows the true state; a real robot almost never does. Noise, delay, and state estimation will later appear between <span class="formula-inline">x</span> and <span class="formula-inline">y</span>.
     </section>
 
     <footer>
-      Связанный урок: <a href="../lessons/0001-robot-as-feedback-loop.html">Робот как контур обратной связи</a>.
+      Related lesson: <a href="../lessons/0001-robot-as-feedback-loop.html">A robot as a feedback loop</a>.
     </footer>
   </main>
 </body>

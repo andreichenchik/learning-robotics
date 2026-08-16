@@ -60,7 +60,7 @@
     context.setLineDash([]);
     context.fillStyle = "#8f4e13";
     context.font = "600 13px system-ui";
-    context.fillText("цель r = 1", margin.left + 5, toY(target) - 7);
+    context.fillText("target r = 1", margin.left + 5, toY(target) - 7);
 
     context.strokeStyle = "#176b4d";
     context.fillStyle = "#176b4d";
@@ -87,7 +87,7 @@
       context.fillText(String(index), toX(index), height - 12);
     }
     context.textAlign = "left";
-    context.fillText("шаг k", width - 66, height - 12);
+    context.fillText("step k", width - 66, height - 12);
   }
 
   function format(value) {
@@ -133,17 +133,17 @@
     document.querySelector("[data-discrete-command-output]").textContent = format(command);
 
     if (Math.abs(position) > 20) {
-      status.textContent = "Амплитуда растёт: дискретный контур расходится.";
+      status.textContent = "The amplitude is growing: the discrete loop is diverging.";
     } else if (Math.abs(target - position) < 0.01 && config.delaySteps === 0) {
-      status.textContent = "Состояние сошлось к цели.";
+      status.textContent = "The state converged to the target.";
     } else if (config.delaySteps > 0) {
-      status.textContent = "Контроллер действует по прошлому измерению y, а не по текущему x.";
+      status.textContent = "The controller acts on the past measurement y, not the current state x.";
     } else if (product >= 2) {
-      status.textContent = "KₚΔt ≥ 2: каждое исправление увеличивает следующую ошибку.";
+      status.textContent = "KₚΔt ≥ 2: every correction increases the next error.";
     } else if (product > 1) {
-      status.textContent = "1 < KₚΔt < 2: состояние пересекает цель, но ошибка уменьшается.";
+      status.textContent = "1 < KₚΔt < 2: the state crosses the target, but the error decreases.";
     } else {
-      status.textContent = "0 < KₚΔt ≤ 1: состояние приближается к цели без перелёта.";
+      status.textContent = "0 < KₚΔt ≤ 1: the state approaches the target without overshoot.";
     }
   }
 

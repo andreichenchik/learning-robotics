@@ -170,7 +170,7 @@
     trailTimer = 0;
     linearInput.value = "0.5";
     angularInput.value = "0";
-    status.textContent = "Выбери движение или укажи цель кликом на поле.";
+    status.textContent = "Choose a motion or click the field to set a target.";
     render();
   }
 
@@ -187,7 +187,7 @@
       command = DifferentialDrive.waypointCommand(pose, target, controller);
       if (command.linearVelocity === 0 && command.angularVelocity === 0) {
         mode = "paused";
-        status.textContent = "Цель достигнута.";
+        status.textContent = "Target reached.";
       }
     }
 
@@ -217,7 +217,7 @@
   canvas.addEventListener("click", (event) => {
     const bounds = canvas.getBoundingClientRect();
     target = canvasToWorld({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
-    status.textContent = "Новая цель выбрана. Нажми «К цели».";
+    status.textContent = "A new target is selected. Choose \"To target.\"";
     draw();
   });
 
@@ -225,26 +225,26 @@
     setManualCommand(
       Number(linearInput.value),
       Number(angularInput.value),
-      "Ручной режим: команда удерживается до паузы."
+      "Manual mode: the command is held until paused."
     );
   });
   document.querySelector("[data-drive-straight]").addEventListener("click", () => {
-    setManualCommand(0.55, 0, "Одинаковые скорости колёс дают движение прямо.");
+    setManualCommand(0.55, 0, "Equal wheel speeds produce straight motion.");
   });
   document.querySelector("[data-drive-rotate]").addEventListener("click", () => {
-    setManualCommand(0, 1.2, "Колёса вращаются в разные стороны: робот поворачивается на месте.");
+    setManualCommand(0, 1.2, "The wheels rotate in opposite directions, so the robot turns in place.");
   });
   document.querySelector("[data-drive-arc]").addEventListener("click", () => {
-    setManualCommand(0.5, 0.8, "Поступательная и угловая скорости вместе создают дугу.");
+    setManualCommand(0.5, 0.8, "Linear and angular velocity together produce an arc.");
   });
   document.querySelector("[data-drive-target]").addEventListener("click", () => {
     mode = "autopilot";
-    status.textContent = "Контроллер поворачивает робота и сокращает расстояние до цели.";
+    status.textContent = "The controller turns the robot and reduces the distance to the target.";
   });
   document.querySelector("[data-drive-pause]").addEventListener("click", () => {
     mode = "paused";
     command = { linearVelocity: 0, angularVelocity: 0 };
-    status.textContent = "Симуляция приостановлена.";
+    status.textContent = "The simulation is paused.";
     updateReadout();
   });
   document.querySelector("[data-drive-reset]").addEventListener("click", reset);

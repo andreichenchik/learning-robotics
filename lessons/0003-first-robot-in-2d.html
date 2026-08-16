@@ -1,75 +1,75 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Урок 0003: Первый робот в 2D</title>
+  <title>Lesson 0003: The first robot in 2D</title>
   <link rel="stylesheet" href="../assets/styles.css?v=3">
 </head>
 <body>
   <main>
-    <p class="eyebrow">Robotics · урок 0003 · 25 минут</p>
-    <h1>Первый робот в 2D</h1>
-    <p class="lede">Перенесём знакомый цикл управления на плоскость. Теперь положение — это не одна координата, а поза, а колёса запрещают роботу мгновенно ехать вбок.</p>
+    <p class="eyebrow">Robotics · lesson 0003 · 25 minutes</p>
+    <h1>The first robot in 2D</h1>
+    <p class="lede">We will move the familiar control loop onto a plane. Position is no longer one coordinate but a pose, and the wheels prevent the robot from moving sideways instantly.</p>
 
     <section class="card goal">
-      <strong>Результат урока.</strong> Ты сможешь обновить позу differential-drive робота, предсказать прямую, вращение и дугу, а затем отправить робота к выбранной точке.
+      <strong>Lesson outcome.</strong> You will be able to update the pose of a differential-drive robot, predict straight motion, rotation, and arcs, then send the robot to a selected point.
     </section>
 
-    <h2>1. Почему двух координат недостаточно</h2>
-    <p>Два робота могут находиться в одной точке <span class="formula-inline">(x,y)</span>, но смотреть в разные стороны. При одинаковой команде «вперёд» их будущее различается. Поэтому геометрическое состояние шасси — <strong>поза</strong>:</p>
+    <h2>1. Why two coordinates are not enough</h2>
+    <p>Two robots can occupy the same point <span class="formula-inline">(x,y)</span> while facing different directions. Given the same "forward" command, their futures differ. The chassis's geometric state is therefore its <strong>pose</strong>:</p>
     <div class="formula">q = (x, y, θ)</div>
-    <p><span class="formula-inline">x,y</span> задают середину оси колёс в мировой системе координат. Угол <span class="formula-inline">θ</span> задаёт направление локальной оси «вперёд», жёстко связанной с роботом.</p>
+    <p><span class="formula-inline">x,y</span> locate the midpoint of the wheel axle in the world frame. Angle <span class="formula-inline">θ</span> gives the direction of the local forward axis fixed to the robot.</p>
 
-    <p class="source">Основной источник: <a href="https://www.roboticsbook.org/S51_diffdrive_state.html"><em>Introduction to Robotics and Perception: State Space for a Differential-Drive Robot</em></a>. Там поза задаётся как <span class="formula-inline">q=(x,y,θ)</span>, поскольку ориентация определяет доступное направление движения.</p>
+    <p class="source">Primary source: <a href="https://www.roboticsbook.org/S51_diffdrive_state.html"><em>Introduction to Robotics and Perception: State Space for a Differential-Drive Robot</em></a>. It defines pose as <span class="formula-inline">q=(x,y,θ)</span> because orientation determines the available direction of motion.</p>
 
-    <h2>2. Ограничение колёс</h2>
-    <p>Обычное колесо катится вперёд-назад, но не скользит вдоль своей оси. Поэтому у робота нет независимой команды боковой скорости. Он управляется двумя величинами:</p>
+    <h2>2. The wheel constraint</h2>
+    <p>A conventional wheel rolls forward and backward but does not slide along its axle. The robot therefore has no independent lateral-velocity command. It is controlled by two quantities:</p>
     <div class="rule-grid">
-      <div><strong>v</strong>Линейная скорость вперёд.</div>
-      <div><strong>ω</strong>Угловая скорость поворота.</div>
-      <div><strong>Боковая скорость</strong>Равна нулю в системе робота.</div>
+      <div><strong>v</strong>Forward linear velocity.</div>
+      <div><strong>ω</strong>Angular velocity.</div>
+      <div><strong>Lateral velocity</strong>Zero in the robot frame.</div>
     </div>
-    <p>Такое ограничение называют <strong>неголономным</strong>: робот может попасть в любую позу, но не любым мгновенным движением. Например, парковочное место достижимо, хотя автомобиль не умеет сдвинуться строго боком.</p>
+    <p>This constraint is called <strong>nonholonomic</strong>: the robot can reach any pose, but not through any instantaneous motion. A parking space, for example, is reachable even though a car cannot shift strictly sideways.</p>
 
-    <p class="source">Первоисточники: <a href="https://www.roboticsbook.org/S52_diffdrive_actions.html"><em>Motion Model for the Differential Drive Robot</em></a> и <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/13-3-1-modeling-of-nonholonomic-wheeled-mobile-robots/"><em>Modern Robotics: Modeling of Nonholonomic Wheeled Mobile Robots</em></a>.</p>
+    <p class="source">Primary sources: <a href="https://www.roboticsbook.org/S52_diffdrive_actions.html"><em>Motion Model for the Differential Drive Robot</em></a> and <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/13-3-1-modeling-of-nonholonomic-wheeled-mobile-robots/"><em>Modern Robotics: Modeling of Nonholonomic Wheeled Mobile Robots</em></a>.</p>
 
-    <h2>3. Один дискретный шаг</h2>
-    <p>Прошлый урок уже дал шаблон <span class="formula-inline">следующее = текущее + Δt · скорость</span>. Направление скорости теперь зависит от <span class="formula-inline">θ</span>:</p>
+    <h2>3. One discrete step</h2>
+    <p>The previous lesson provided the template <span class="formula-inline">next = current + Δt · velocity</span>. The direction of velocity now depends on <span class="formula-inline">θ</span>:</p>
     <div class="formula">xₖ₊₁ = xₖ + Δt · vₖ cos θₖ<br>yₖ₊₁ = yₖ + Δt · vₖ sin θₖ<br>θₖ₊₁ = wrap(θₖ + Δt · ωₖ)</div>
-    <p>При <span class="formula-inline">θ=0</span> робот смотрит вдоль мировой оси x. При <span class="formula-inline">θ=π/2</span> он смотрит вдоль мировой оси y. Функция <span class="formula-inline">wrap</span> оставляет угол в удобном диапазоне от <span class="formula-inline">−π</span> до <span class="formula-inline">π</span>.</p>
+    <p>At <span class="formula-inline">θ=0</span>, the robot faces along the world's x-axis. At <span class="formula-inline">θ=π/2</span>, it faces along the world's y-axis. Function <span class="formula-inline">wrap</span> keeps the angle in the convenient range from <span class="formula-inline">−π</span> to <span class="formula-inline">π</span>.</p>
 
-    <h2>4. Почему привод называется differential drive</h2>
-    <p>Левое и правое колёса вращаются независимо. Их разность создаёт поворот:</p>
+    <h2>4. Why the drive is called differential</h2>
+    <p>The left and right wheels rotate independently. Their difference produces a turn:</p>
     <div class="formula">φ̇L = (v − Lω/2) / r<br>φ̇R = (v + Lω/2) / r</div>
-    <p>Здесь <span class="formula-inline">r</span> — радиус колеса, <span class="formula-inline">L</span> — расстояние между колёсами. Равные скорости дают прямую; противоположные — вращение на месте.</p>
+    <p>Here, <span class="formula-inline">r</span> is wheel radius and <span class="formula-inline">L</span> is the distance between the wheels. Equal speeds produce straight motion; opposite speeds produce rotation in place.</p>
 
-    <h2>5. Эксперимент</h2>
+    <h2>5. Experiment</h2>
     <section class="card simulator">
-      <canvas class="pose-canvas" data-drive-canvas aria-label="Differential-drive робот на плоскости"></canvas>
+      <canvas class="pose-canvas" data-drive-canvas aria-label="Differential-drive robot on a plane"></canvas>
 
       <div class="controls">
         <label>
-          Линейная скорость v: <output data-linear-output>0.50</output>
+          Linear velocity v: <output data-linear-output>0.50</output>
           <input data-linear-velocity type="range" min="-0.8" max="0.8" value="0.5" step="0.05">
         </label>
         <label>
-          Угловая скорость ω: <output data-angular-output>0.00</output>
+          Angular velocity ω: <output data-angular-output>0.00</output>
           <input data-angular-velocity type="range" min="-1.8" max="1.8" value="0" step="0.1">
         </label>
       </div>
 
       <div class="preset-grid">
-        <button data-drive-straight type="button">Прямо</button>
-        <button data-drive-rotate type="button">На месте</button>
-        <button data-drive-arc type="button">Дуга</button>
-        <button data-drive-target type="button">К цели</button>
+        <button data-drive-straight type="button">Straight</button>
+        <button data-drive-rotate type="button">In place</button>
+        <button data-drive-arc type="button">Arc</button>
+        <button data-drive-target type="button">To target</button>
       </div>
 
       <div class="buttons">
-        <button data-drive-manual type="button">Ручная команда</button>
-        <button data-drive-pause class="secondary" type="button">Пауза</button>
-        <button data-drive-reset class="secondary" type="button">Сбросить</button>
+        <button data-drive-manual type="button">Manual command</button>
+        <button data-drive-pause class="secondary" type="button">Pause</button>
+        <button data-drive-reset class="secondary" type="button">Reset</button>
       </div>
 
       <div class="readout pose-readout">
@@ -81,61 +81,61 @@
         <div>φ̇L<strong data-wheel-left>0.00</strong></div>
         <div>φ̇R<strong data-wheel-right>0.00</strong></div>
       </div>
-      <p class="muted small" data-drive-status aria-live="polite">Выбери движение или укажи цель кликом на поле.</p>
+      <p class="muted small" data-drive-status aria-live="polite">Choose a motion or click the field to set a target.</p>
     </section>
 
     <ol class="steps">
-      <li>Нажми «Сбросить», затем «Прямо». Какие компоненты позы меняются при начальном <span class="formula-inline">θ=30°</span>?</li>
-      <li>Сравни «На месте» и «Дуга». Свяжи форму траектории со значениями <span class="formula-inline">v</span> и <span class="formula-inline">ω</span>.</li>
-      <li>Поставь цель кликом сбоку или позади робота и нажми «К цели». Почему контроллер сначала уменьшает <span class="formula-inline">v</span> и создаёт большую <span class="formula-inline">ω</span>?</li>
+      <li>Select "Reset," then "Straight." Which pose components change from the initial <span class="formula-inline">θ=30°</span>?</li>
+      <li>Compare "In place" and "Arc." Relate the trajectory shape to the values of <span class="formula-inline">v</span> and <span class="formula-inline">ω</span>.</li>
+      <li>Click to place the target beside or behind the robot, then select "To target." Why does the controller initially reduce <span class="formula-inline">v</span> and create a large <span class="formula-inline">ω</span>?</li>
     </ol>
 
-    <h2>6. Контроллер движения к точке</h2>
-    <p>Контроллер сначала находит направление на цель, затем сравнивает его с текущим <span class="formula-inline">θ</span>:</p>
+    <h2>6. Point-to-point controller</h2>
+    <p>The controller first finds the direction to the target, then compares it with the current <span class="formula-inline">θ</span>:</p>
     <div class="formula">α = atan2(y* − y, x* − x)<br>eθ = wrap(α − θ)<br>ω = Kθ · eθ<br>v = Kv · distance · max(0, cos eθ)</div>
-    <p>Множитель <span class="formula-inline">cos eθ</span> замедляет поступательное движение, пока робот смотрит в сторону от цели. Это не единственный возможный контроллер, а минимальный пример композиции уже знакомых идей: состояние → ошибка → команда → новое состояние.</p>
+    <p>The <span class="formula-inline">cos eθ</span> factor slows forward motion while the robot faces away from the target. This is not the only possible controller, but a minimal example that composes familiar ideas: state → error → command → new state.</p>
 
     <section class="card note">
-      <strong>Граница модели.</strong> Симуляция предполагает идеальное качение без скольжения и мгновенное выполнение скоростей колёс. Реальный робот добавит динамику моторов, сцепление, неточную геометрию и ошибку одометрии.
+      <strong>Model boundary.</strong> The simulation assumes ideal rolling without slip and instant execution of wheel velocities. A real robot adds motor dynamics, traction, imprecise geometry, and odometry error.
     </section>
 
-    <h2>7. Проверка из памяти</h2>
-    <form class="card quiz" data-quiz data-correct="direction" data-success="Верно: одинаковая команда v направлена вдоль текущего θ." data-retry="Представь двух роботов в одной точке, смотрящих в разные стороны.">
+    <h2>7. Recall check</h2>
+    <form class="card quiz" data-quiz data-correct="direction" data-success="Correct: the same v command points along the current θ." data-retry="Imagine two robots at the same point facing different directions.">
       <fieldset>
-        <legend>Почему θ входит в позу differential-drive робота?</legend>
-        <label><input type="radio" name="q1" value="direction"> Определяет доступное направление движения</label>
-        <label><input type="radio" name="q1" value="history"> Хранит пройденное роботом расстояние</label>
-        <label><input type="radio" name="q1" value="world"> Задаёт положение мировой системы</label>
+        <legend>Why is θ part of a differential-drive robot's pose?</legend>
+        <label><input type="radio" name="q1" value="direction"> It determines the available direction of motion</label>
+        <label><input type="radio" name="q1" value="history"> It stores the distance traveled by the robot</label>
+        <label><input type="radio" name="q1" value="world"> It defines the location of the world frame</label>
       </fieldset>
-      <button type="submit">Проверить</button>
+      <button type="submit">Check</button>
       <p class="quiz-result" data-quiz-result aria-live="polite"></p>
     </form>
 
-    <form class="card quiz" data-quiz data-correct="arc" data-success="Верно: одновременное поступательное движение и поворот создают дугу." data-retry="Сравни три пресета и значения v, ω.">
+    <form class="card quiz" data-quiz data-correct="arc" data-success="Correct: simultaneous forward motion and rotation produce an arc." data-retry="Compare the three presets and their v and ω values.">
       <fieldset>
-        <legend>Какая команда создаёт движение по дуге?</legend>
-        <label><input type="radio" name="q2" value="straight"> Только ненулевая скорость v</label>
-        <label><input type="radio" name="q2" value="rotate"> Только ненулевая скорость ω</label>
-        <label><input type="radio" name="q2" value="arc"> Обе скорости одновременно ненулевые</label>
+        <legend>Which command produces motion along an arc?</legend>
+        <label><input type="radio" name="q2" value="straight"> Only a nonzero v</label>
+        <label><input type="radio" name="q2" value="rotate"> Only a nonzero ω</label>
+        <label><input type="radio" name="q2" value="arc"> Both velocities are nonzero</label>
       </fieldset>
-      <button type="submit">Проверить</button>
+      <button type="submit">Check</button>
       <p class="quiz-result" data-quiz-result aria-live="polite"></p>
     </form>
 
-    <h2>8. Твой короткий отчёт</h2>
+    <h2>8. Your short report</h2>
     <ol class="steps">
-      <li>Почему одинаковые <span class="formula-inline">(x,y)</span>, но разные <span class="formula-inline">θ</span> дают разное будущее при одинаковом <span class="formula-inline">v</span>?</li>
-      <li>Какие сочетания <span class="formula-inline">v</span> и <span class="formula-inline">ω</span> дают прямую, вращение на месте и дугу?</li>
-      <li>Почему контроллер не может просто независимо задать желаемые <span class="formula-inline">ẋ</span> и <span class="formula-inline">ẏ</span>?</li>
+      <li>Why do identical <span class="formula-inline">(x,y)</span> but different <span class="formula-inline">θ</span> lead to different futures under the same <span class="formula-inline">v</span>?</li>
+      <li>Which combinations of <span class="formula-inline">v</span> and <span class="formula-inline">ω</span> produce straight motion, rotation in place, and an arc?</li>
+      <li>Why can the controller not independently set the desired <span class="formula-inline">ẋ</span> and <span class="formula-inline">ẏ</span>?</li>
     </ol>
-    <p>Ответь через аннотации или в чате. После подтверждения перейдём от известной позы к первой задаче perception: робот получает несовершенное измерение собственного движения.</p>
+    <p>Answer through annotations or in chat. Once your understanding is confirmed, we will move from known pose to the first perception problem: the robot receives an imperfect measurement of its own motion.</p>
 
     <section class="card">
-      <strong>Для закрепления:</strong> используй <a href="../reference/pose-and-differential-drive.html">шпаргалку по позе и differential drive</a>.
+      <strong>For reinforcement:</strong> use the <a href="../reference/pose-and-differential-drive.html">pose and differential-drive reference</a>.
     </section>
 
     <footer>
-      Основные источники: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S51_diffdrive_state.html"><em>State Space for a Differential-Drive Robot</em></a> и <a href="https://www.roboticsbook.org/S52_diffdrive_actions.html"><em>Motion Model for the Differential Drive Robot</em></a>.
+      Primary sources: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S51_diffdrive_state.html"><em>State Space for a Differential-Drive Robot</em></a> and <a href="https://www.roboticsbook.org/S52_diffdrive_actions.html"><em>Motion Model for the Differential Drive Robot</em></a>.
     </footer>
   </main>
   <script src="../assets/differential-drive.js"></script>

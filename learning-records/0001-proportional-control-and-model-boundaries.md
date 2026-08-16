@@ -1,13 +1,13 @@
-# Пропорциональное управление и границы модели
+# Proportional control and model boundaries
 
 Status: superseded by LR-0002
 
-Пользователь правильно связал уменьшение команды с уменьшением ошибки в пропорциональном контроллере и самостоятельно назвал мгновенную реакцию нереалистичным допущением симуляции, отметив задержку реального исполнительного механизма. Значит, дальнейшие уроки могут опираться на формулу `u = Kₚe` и явно вводить время, динамику и несовершенство модели.
+The learner correctly connected the decreasing command to the decreasing error in a proportional controller. They independently identified instantaneous response as an unrealistic simulation assumption and noted the delay of a real actuator. Future lessons can therefore build on `u = Kₚe` and explicitly introduce time, dynamics, and model imperfections.
 
 ## Evidence
 
-Ответы на итоговые вопросы урока 0001: команда прямо пропорциональна ошибке; реальный робот реагирует с задержкой.
+Answers to lesson 0001's final questions: the command is directly proportional to the error; a real robot responds with a delay.
 
 ## Implications
 
-На момент записи термин «замкнутый контур» ещё не был усвоен: пользователь связал его с отсутствием внешнего воздействия, а не с возвратом измеренного результата в вычисление следующей команды. Это понимание позднее исправлено в LR-0002.
+At the time of this record, the term "closed loop" had not yet been understood: the learner associated it with the absence of external influence rather than feeding the measured result back into the computation of the next command. This understanding was later corrected in LR-0002.

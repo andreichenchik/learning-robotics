@@ -1,8 +1,8 @@
 # Teaching notes
 
 - Language: use English for all new lessons, reference material, terminology, UI copy, and teacher feedback. The learner may answer in Russian or English; evaluate the concepts independently of the response language.
-- Предпочтение: гибрид проектного и фундаментального обучения.
-- Формат объяснений: интуиция → модель/математика → код/эксперимент → границы применимости.
-- Уроки должны давать небольшой видимый результат и не предполагать фиксированного недельного расписания.
-- Предыдущий опыт: математика и ML/DL изучались раньше, но детали забыты; проверять понимание и восстанавливать только нужные предпосылки.
-- Интерес к конкретному классу роботов пока не определён; чередовать мобильные системы, манипуляцию и динамические модели.
+- Preference: a hybrid of project-based and fundamentals-based learning.
+- Explanation format: intuition → model/mathematics → code/experiment → limits of applicability.
+- Lessons must produce a small, visible result and must not assume a fixed weekly schedule.
+- Prior experience: mathematics and ML/DL were studied before, but the details have faded; check understanding and refresh only the prerequisites that are needed.
+- Interest in a specific class of robots has not yet been established; alternate among mobile systems, manipulation, and dynamic models.

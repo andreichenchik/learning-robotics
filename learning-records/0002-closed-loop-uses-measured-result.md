@@ -1,7 +1,7 @@
-# Замкнутый контур использует измеренный результат
+# A closed loop uses the measured result
 
-Пользователь отличил замкнутое управление от разомкнутого: контур размыкается, если убрать повторное измерение позиции, потому что фактический результат перестаёт влиять на следующую команду. Это позволяет дальше рассматривать возмущения, задержки измерений и дискретный цикл управления без повторного введения основной архитектуры.
+The learner distinguished closed-loop from open-loop control: the loop is opened when repeated position measurement is removed, because the actual result no longer influences the next command. Future lessons can therefore cover disturbances, measurement delays, and the discrete control loop without reintroducing the basic architecture.
 
 ## Evidence
 
-В проверочном вопросе пользователь выбрал удаление повторного измерения позиции, а не удаление внешних толчков.
+In the check question, the learner chose removal of repeated position measurement rather than removal of external pushes.

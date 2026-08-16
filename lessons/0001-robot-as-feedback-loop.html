@@ -1,125 +1,125 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Урок 0001: Робот как контур обратной связи</title>
+  <title>Lesson 0001: A robot as a feedback loop</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
   <main>
-    <p class="eyebrow">Robotics · урок 0001 · 15 минут</p>
-    <h1>Робот как контур обратной связи</h1>
-    <p class="lede">Первый виртуальный робот будет предельно простым. Зато ты увидишь конструкцию, которая останется внутри колёсного робота, манипулятора и квадрокоптера.</p>
+    <p class="eyebrow">Robotics · lesson 0001 · 15 minutes</p>
+    <h1>A robot as a feedback loop</h1>
+    <p class="lede">The first virtual robot will be extremely simple. Yet you will see a structure that remains inside a wheeled robot, a manipulator, and a quadrotor.</p>
 
     <section class="card goal">
-      <strong>Результат урока.</strong> Ты сможешь предсказать поведение пропорционального контроллера, подобрать его коэффициент в симуляции и объяснить, зачем роботу постоянно измерять результат своих действий.
+      <strong>Lesson outcome.</strong> You will be able to predict the behavior of a proportional controller, tune its gain in a simulation, and explain why a robot must continuously measure the result of its actions.
     </section>
 
-    <h2>1. Суть: действие — это цикл</h2>
-    <p>Программа без обратной связи говорит: «подай такую-то команду». Контроллер с обратной связью снова и снова спрашивает: «где мы сейчас относительно цели — и какую коррекцию дать теперь?»</p>
+    <h2>1. The core idea: action is a loop</h2>
+    <p>A program without feedback says, "apply this command." A feedback controller asks again and again, "where are we relative to the target, and what correction should we apply now?"</p>
 
-    <div class="loop" aria-label="Цикл управления">
-      <div><strong>Измерить<br>позицию</strong></div>
-      <div><strong>Найти<br>ошибку</strong></div>
-      <div><strong>Вычислить<br>команду</strong></div>
-      <div><strong>Сдвинуть<br>робота</strong></div>
+    <div class="loop" aria-label="Control loop">
+      <div><strong>Measure<br>position</strong></div>
+      <div><strong>Find<br>error</strong></div>
+      <div><strong>Compute<br>command</strong></div>
+      <div><strong>Move<br>robot</strong></div>
     </div>
 
-    <p>Это согласуется с базовой архитектурой sensing → computation → actuation из главы 1 книги Åström и Murray: замкнутый контур измеряет расхождение между фактическим и желаемым значениями и создаёт корректирующее действие. <a href="https://fbswiki.org/wiki/index.php/Introduction">Первоисточник: <em>Feedback Systems</em>, глава 1</a>.</p>
+    <p>This matches the basic sensing → computation → actuation architecture from Chapter 1 of Åström and Murray: a closed loop measures the difference between actual and desired values and creates a corrective action. <a href="https://fbswiki.org/wiki/index.php/Introduction">Primary source: <em>Feedback Systems</em>, Chapter 1</a>.</p>
 
-    <h2>2. Одна идея с трёх сторон</h2>
+    <h2>2. One idea from three perspectives</h2>
 
-    <h3>Интуитивно: пружина</h3>
-    <p>Представь невидимую пружину между роботом и целью. Чем дальше робот от цели, тем сильнее она тянет. У цели растяжение исчезает — значит, исчезает и команда.</p>
+    <h3>Intuitively: a spring</h3>
+    <p>Imagine an invisible spring between the robot and the target. The farther the robot is from the target, the harder the spring pulls. At the target, the extension disappears, so the command disappears too.</p>
 
-    <h3>Формально: ошибка превращается в команду</h3>
-    <div class="formula">ошибка: e = r − x<br>команда: u = Kₚ · e<br>движение: dx/dt = u</div>
-    <p><span class="formula-inline">r</span> — целевая позиция, <span class="formula-inline">x</span> — текущая позиция, <span class="formula-inline">u</span> — скорость, <span class="formula-inline">Kₚ</span> — насколько резко контроллер реагирует. Если робот левее цели, ошибка положительна и команда направлена вправо. По мере приближения ошибка и скорость уменьшаются.</p>
+    <h3>Formally: error becomes a command</h3>
+    <div class="formula">error: e = r − x<br>command: u = Kₚ · e<br>motion: dx/dt = u</div>
+    <p><span class="formula-inline">r</span> is the target position, <span class="formula-inline">x</span> is the current position, <span class="formula-inline">u</span> is velocity, and <span class="formula-inline">Kₚ</span> determines how strongly the controller responds. If the robot is left of the target, the error is positive and the command points right. As the robot approaches, both error and velocity decrease.</p>
 
-    <h3>Алгоритмически: повторять</h3>
+    <h3>Algorithmically: repeat</h3>
     <div class="formula">while robot_is_running:<br>&nbsp;&nbsp;error = target - measured_position<br>&nbsp;&nbsp;command = gain * error<br>&nbsp;&nbsp;send_to_actuator(command)</div>
 
     <section class="card note">
-      <strong>Граница модели.</strong> Наш «робот» — точка на рельсе, которая мгновенно выполняет команду скорости. У него пока нет массы, колёс, ориентации, шума сенсора и задержки. Это осознанная изоляция одной идеи, а не реалистичная физика.
+      <strong>Model boundary.</strong> Our "robot" is a point on a rail that executes velocity commands instantly. It has no mass, wheels, orientation, sensor noise, or delay yet. This deliberately isolates one idea; it is not realistic physics.
     </section>
 
-    <h2>3. Эксперимент</h2>
+    <h2>3. Experiment</h2>
     <section class="card simulator">
-      <canvas data-simulator-canvas aria-label="Робот на одномерном треке"></canvas>
+      <canvas data-simulator-canvas aria-label="Robot on a one-dimensional track"></canvas>
 
       <div class="controls">
         <label>
-          Реакция Kₚ: <output data-gain-output>1.0</output>
+          Response Kₚ: <output data-gain-output>1.0</output>
           <input data-gain type="range" min="0" max="3" value="1" step="0.1">
         </label>
         <label>
-          Цель r
+          Target r
           <input data-target type="range" min="0.08" max="0.92" value="0.78" step="0.01">
         </label>
       </div>
 
       <div class="buttons">
-        <button data-run type="button">Запустить</button>
-        <button data-disturb class="secondary" type="button">Толкнуть робота</button>
-        <button data-reset class="secondary" type="button">Сбросить</button>
+        <button data-run type="button">Run</button>
+        <button data-disturb class="secondary" type="button">Push the robot</button>
+        <button data-reset class="secondary" type="button">Reset</button>
       </div>
 
       <div class="readout">
-        <div>Позиция x<strong data-position-output>0.140</strong></div>
-        <div>Ошибка e<strong data-error-output>0.640</strong></div>
-        <div>Команда u<strong data-command-output>0.000</strong></div>
+        <div>Position x<strong data-position-output>0.140</strong></div>
+        <div>Error e<strong data-error-output>0.640</strong></div>
+        <div>Command u<strong data-command-output>0.000</strong></div>
       </div>
-      <p class="muted small" data-status aria-live="polite">Настрой коэффициент и запусти контур.</p>
+      <p class="muted small" data-status aria-live="polite">Set the gain and run the loop.</p>
     </section>
 
     <ol class="steps">
-      <li>До запуска предскажи: что произойдёт при <span class="formula-inline">Kₚ = 0</span>? Проверь.</li>
-      <li>Сравни <span class="formula-inline">Kₚ = 0.4</span> и <span class="formula-inline">Kₚ = 2.4</span>. Следи не только за роботом, но и за ошибкой и командой.</li>
-      <li>Дождись цели, нажми «Толкнуть робота». Почему команда сначала резко появляется, а затем снова исчезает?</li>
-      <li>Перемести цель во время движения. Найди, какая строка алгоритма немедленно получает новое значение.</li>
+      <li>Before running it, predict what happens when <span class="formula-inline">Kₚ = 0</span>. Then check.</li>
+      <li>Compare <span class="formula-inline">Kₚ = 0.4</span> and <span class="formula-inline">Kₚ = 2.4</span>. Watch the error and command as well as the robot.</li>
+      <li>Wait until the robot reaches the target, then select "Push the robot." Why does the command appear sharply and then disappear again?</li>
+      <li>Move the target while the robot is moving. Find which line of the algorithm immediately receives a new value.</li>
     </ol>
 
-    <h2>4. Проверка из памяти</h2>
-    <p>Не прокручивай вверх. Ошибка здесь полезна: извлечение ответа из памяти укрепляет знание лучше повторного чтения.</p>
+    <h2>4. Recall check</h2>
+    <p>Do not scroll up. Making a mistake is useful here: retrieving an answer from memory strengthens knowledge better than rereading it.</p>
 
-    <form class="card quiz" data-quiz data-correct="return" data-success="Верно: толчок создаёт ошибку, а ошибка — корректирующую команду." data-retry="Посмотри, что происходит с ошибкой сразу после толчка, и попробуй ещё раз.">
+    <form class="card quiz" data-quiz data-correct="return" data-success="Correct: the push creates an error, and the error creates a corrective command." data-retry="Look at what happens to the error immediately after the push, then try again.">
       <fieldset>
-        <legend>Что сделает работающий контроллер после внешнего толчка?</legend>
-        <label><input type="radio" name="q1" value="return"> Вернётся точно к цели</label>
-        <label><input type="radio" name="q1" value="stay"> Замрёт точно на месте</label>
-        <label><input type="radio" name="q1" value="leave"> Уедет дальше от цели</label>
+        <legend>What will a running controller do after an external push?</legend>
+        <label><input type="radio" name="q1" value="return"> Return exactly to the target</label>
+        <label><input type="radio" name="q1" value="stay"> Stop exactly where it is</label>
+        <label><input type="radio" name="q1" value="leave"> Move farther from the target</label>
       </fieldset>
-      <button type="submit">Проверить</button>
+      <button type="submit">Check</button>
       <p class="quiz-result" data-quiz-result aria-live="polite"></p>
     </form>
 
-    <form class="card quiz" data-quiz data-correct="command" data-success="Верно: Kₚ = 0 обнуляет команду независимо от ошибки." data-retry="Подставь Kₚ = 0 в формулу u = Kₚ · e и попробуй снова.">
+    <form class="card quiz" data-quiz data-correct="command" data-success="Correct: Kₚ = 0 makes the command zero regardless of the error." data-retry="Substitute Kₚ = 0 into u = Kₚ · e, then try again.">
       <fieldset>
-        <legend>Что обязательно станет нулевым при Kₚ = 0?</legend>
-        <label><input type="radio" name="q2" value="command"> Команда станет точно нулевой</label>
-        <label><input type="radio" name="q2" value="error"> Ошибка станет точно нулевой</label>
-        <label><input type="radio" name="q2" value="target"> Цель станет точно нулевой</label>
+        <legend>What must become zero when Kₚ = 0?</legend>
+        <label><input type="radio" name="q2" value="command"> The command becomes exactly zero</label>
+        <label><input type="radio" name="q2" value="error"> The error becomes exactly zero</label>
+        <label><input type="radio" name="q2" value="target"> The target becomes exactly zero</label>
       </fieldset>
-      <button type="submit">Проверить</button>
+      <button type="submit">Check</button>
       <p class="quiz-result" data-quiz-result aria-live="polite"></p>
     </form>
 
-    <h2>5. Твой короткий отчёт</h2>
-    <p>Ответь учителю своими словами — без подсматривания:</p>
+    <h2>5. Your short report</h2>
+    <p>Answer the teacher in your own words without looking back:</p>
     <ol class="steps">
-      <li>Почему команда уменьшается при приближении к цели?</li>
-      <li>Что именно делает систему «замкнутым контуром»?</li>
-      <li>Назови одно допущение симуляции, которое сломается на реальном роботе.</li>
+      <li>Why does the command decrease as the robot approaches the target?</li>
+      <li>What exactly makes the system a "closed loop"?</li>
+      <li>Name one simulation assumption that would fail on a real robot.</li>
     </ol>
-    <p>По ответу я определю, что уже усвоено, запишу первый learning record и выберу следующий шаг: состояние и дискретное время, либо движение колёсного робота в 2D.</p>
+    <p>I will use your answer to determine what you have learned, write the first learning record, and choose the next step: state and discrete time, or the motion of a wheeled robot in 2D.</p>
 
     <section class="card">
-      <strong>Для закрепления:</strong> сохрани рядом <a href="../reference/feedback-loop.html">шпаргалку по контуру обратной связи</a>. Если формула, эксперимент или термин остались мутными — спроси учителя; это часть урока, а не отвлечение от него.
+      <strong>For reinforcement:</strong> keep the <a href="../reference/feedback-loop.html">feedback-loop reference</a> nearby. If a formula, experiment, or term remains unclear, ask the teacher; that is part of the lesson, not a distraction from it.
     </section>
 
     <footer>
-      Основной источник: Karl J. Åström, Richard M. Murray, <a href="https://fbswiki.org/wiki/index.php/Introduction"><em>Feedback Systems</em>, Chapter 1: Introduction</a>. Для дальнейшей геометрии движения: Lynch &amp; Park, <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/foundations-of-robot-motion/"><em>Modern Robotics: Foundations of Robot Motion</em></a>.
+      Primary source: Karl J. Åström, Richard M. Murray, <a href="https://fbswiki.org/wiki/index.php/Introduction"><em>Feedback Systems</em>, Chapter 1: Introduction</a>. For further motion geometry: Lynch &amp; Park, <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/foundations-of-robot-motion/"><em>Modern Robotics: Foundations of Robot Motion</em></a>.
     </footer>
   </main>
   <script src="../assets/control.js"></script>

@@ -1,78 +1,78 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Урок 0002: Состояние, время и задержка</title>
+  <title>Lesson 0002: State, time, and delay</title>
   <link rel="stylesheet" href="../assets/styles.css?v=2">
 </head>
 <body>
   <main>
-    <p class="eyebrow">Robotics · урок 0002 · 20 минут</p>
-    <h1>Состояние, время и задержка</h1>
-    <p class="lede">В прошлом уроке контроллер выглядел непрерывным. Теперь превратим его в программу, которая просыпается через интервалы времени, читает сенсор и делает один шаг.</p>
+    <p class="eyebrow">Robotics · lesson 0002 · 20 minutes</p>
+    <h1>State, time, and delay</h1>
+    <p class="lede">In the previous lesson, the controller appeared continuous. Now we will turn it into a program that wakes at fixed intervals, reads a sensor, and takes one step.</p>
 
     <section class="card goal">
-      <strong>Результат урока.</strong> Ты сможешь назвать состояние модели, вручную вычислить один дискретный переход и объяснить, почему редкое или задержанное измерение способно раскачать даже простой контроллер.
+      <strong>Lesson outcome.</strong> You will be able to identify a model's state, calculate one discrete transition by hand, and explain why infrequent or delayed measurements can destabilize even a simple controller.
     </section>
 
-    <h2>1. Состояние — память о настоящем</h2>
-    <p><strong>Состояние</strong> — минимальный набор переменных, который вместе с будущими командами позволяет модели предсказывать будущее. В нашей модели команда задаёт скорость напрямую, поэтому единственное состояние — позиция <span class="formula-inline">x</span>.</p>
-    <p>Представь настоящий катящийся мяч. Два мяча могут находиться в одной позиции, но один стоять, а другой быстро двигаться. Их будущее различно, поэтому одной позиции уже недостаточно: в состояние придётся добавить скорость.</p>
+    <h2>1. State is memory of the present</h2>
+    <p><strong>State</strong> is the minimal set of variables that, together with future commands, allows a model to predict the future. In our model, the command directly sets velocity, so the only state is position <span class="formula-inline">x</span>.</p>
+    <p>Imagine a real rolling ball. Two balls can occupy the same position while one is stationary and the other is moving quickly. Their futures differ, so position alone is no longer enough: velocity must be added to the state.</p>
 
     <section class="card note">
-      <strong>Не всё является состоянием.</strong> Цель <span class="formula-inline">r</span> задаётся снаружи, команда <span class="formula-inline">u</span> вычисляется контроллером, измерение <span class="formula-inline">y</span> сообщает что-то о состоянии. Иногда <span class="formula-inline">y=x</span>, но задержка и шум быстро разделяют эти понятия.
+      <strong>Not everything is state.</strong> Target <span class="formula-inline">r</span> is set externally, command <span class="formula-inline">u</span> is computed by the controller, and measurement <span class="formula-inline">y</span> communicates something about the state. Sometimes <span class="formula-inline">y=x</span>, but delay and noise quickly separate these concepts.
     </section>
 
-    <p class="source">Первоисточник определяет состояние как набор переменных, суммирующий прошлое системы для предсказания будущего: <a href="https://fbswiki.org/wiki/index.php/System_Modeling"><em>Feedback Systems</em>, System Modeling</a>. Короткая дополнительная интуиция: <a href="https://fbswiki.org/wiki/index.php/Question%3A_What_is_a_state%3F_How_does_one_determine_what_is_a_state_and_what_is_not%3F">What is a state?</a></p>
+    <p class="source">The primary source defines state as a set of variables that summarizes the system's past for predicting its future: <a href="https://fbswiki.org/wiki/index.php/System_Modeling"><em>Feedback Systems</em>, System Modeling</a>. For a short additional intuition, see <a href="https://fbswiki.org/wiki/index.php/Question%3A_What_is_a_state%3F_How_does_one_determine_what_is_a_state_and_what_is_not%3F">What is a state?</a></p>
 
-    <h2>2. Производная превращается в шаг</h2>
-    <p>Формула <span class="formula-inline">dx/dt = u</span> говорит, с какой скоростью меняется позиция. Компьютеру нужна операция присваивания. Если команда удерживается в течение <span class="formula-inline">Δt</span> секунд:</p>
+    <h2>2. A derivative becomes a step</h2>
+    <p>The formula <span class="formula-inline">dx/dt = u</span> states how quickly position changes. A computer needs an assignment operation. If the command is held for <span class="formula-inline">Δt</span> seconds:</p>
     <div class="formula">xₖ₊₁ = xₖ + Δt · uₖ</div>
-    <p>Индекс <span class="formula-inline">k</span> — не время в секундах, а номер снимка. Один цикл программы теперь полностью виден:</p>
+    <p>Index <span class="formula-inline">k</span> is not time in seconds; it is the snapshot number. One complete program cycle is now visible:</p>
     <div class="formula">yₖ = measured_position()<br>eₖ = r − yₖ<br>uₖ = Kₚ · eₖ<br>xₖ₊₁ = xₖ + Δt · uₖ</div>
 
-    <h2>3. Эксперимент: когда шаг слишком велик</h2>
+    <h2>3. Experiment: when the step is too large</h2>
     <section class="card simulator">
-      <canvas data-discrete-canvas aria-label="График состояния по дискретным шагам"></canvas>
+      <canvas data-discrete-canvas aria-label="State over discrete steps"></canvas>
 
       <div class="controls">
         <label>
-          Коэффициент Kₚ: <output data-discrete-gain-output>1.0</output>
+          Gain Kₚ: <output data-discrete-gain-output>1.0</output>
           <input data-discrete-gain type="range" min="0.2" max="2.4" value="1" step="0.1">
         </label>
         <label>
-          Шаг Δt: <output data-step-size-output>0.25</output> с
+          Step Δt: <output data-step-size-output>0.25</output> s
           <input data-step-size type="range" min="0.05" max="2" value="0.25" step="0.05">
         </label>
         <label>
-          Задержка: <output data-delay-output>0</output> шагов
+          Delay: <output data-delay-output>0</output> steps
           <input data-delay-steps type="range" min="0" max="4" value="0" step="1">
         </label>
         <label>
-          Произведение KₚΔt
+          Product KₚΔt
           <output data-product-output>0.25</output>
         </label>
       </div>
 
       <div class="preset-grid">
-        <button data-preset data-gain="1" data-step-size="0.25" data-delay="0" type="button">Плавно</button>
-        <button data-preset data-gain="1.2" data-step-size="1.2" data-delay="0" type="button">С перелётом</button>
-        <button data-preset data-gain="1.2" data-step-size="1.8" data-delay="0" type="button">Расходится</button>
-        <button data-preset data-gain="1.2" data-step-size="0.5" data-delay="2" type="button">С задержкой</button>
+        <button data-preset data-gain="1" data-step-size="0.25" data-delay="0" type="button">Smooth</button>
+        <button data-preset data-gain="1.2" data-step-size="1.2" data-delay="0" type="button">Overshoot</button>
+        <button data-preset data-gain="1.2" data-step-size="1.8" data-delay="0" type="button">Diverging</button>
+        <button data-preset data-gain="1.2" data-step-size="0.5" data-delay="2" type="button">Delayed</button>
       </div>
 
       <div class="buttons">
-        <button data-one-step type="button">Один шаг</button>
-        <button data-twelve-steps class="secondary" type="button">Ещё 12 шагов</button>
-        <button data-discrete-reset class="secondary" type="button">Сбросить</button>
+        <button data-one-step type="button">One step</button>
+        <button data-twelve-steps class="secondary" type="button">12 more steps</button>
+        <button data-discrete-reset class="secondary" type="button">Reset</button>
       </div>
 
       <div class="readout">
-        <div>Состояние x<strong data-state-output>0.000</strong></div>
-        <div>Измерение y<strong data-measurement-output>0.000</strong></div>
-        <div>Ошибка e<strong data-discrete-error-output>1.000</strong></div>
-        <div>Команда u<strong data-discrete-command-output>1.000</strong></div>
+        <div>State x<strong data-state-output>0.000</strong></div>
+        <div>Measurement y<strong data-measurement-output>0.000</strong></div>
+        <div>Error e<strong data-discrete-error-output>1.000</strong></div>
+        <div>Command u<strong data-discrete-command-output>1.000</strong></div>
       </div>
       <p class="muted small" data-discrete-status aria-live="polite"></p>
 
@@ -85,63 +85,63 @@
     </section>
 
     <ol class="steps">
-      <li>Нажми «Сбросить», затем трижды «Один шаг». Для первого шага заранее вычисли <span class="formula-inline">x₁</span>.</li>
-      <li>Сравни пресеты «Плавно», «С перелётом» и «Расходится». Что меняется в таблице в момент пересечения цели?</li>
-      <li>Выбери «С задержкой». Найди строку, где <span class="formula-inline">xₖ</span> и <span class="formula-inline">yₖ</span> различаются. На какое из них реагирует команда?</li>
+      <li>Select "Reset," then "One step" three times. Calculate <span class="formula-inline">x₁</span> in advance for the first step.</li>
+      <li>Compare the "Smooth," "Overshoot," and "Diverging" presets. What changes in the table when the state crosses the target?</li>
+      <li>Select "Delayed." Find a row where <span class="formula-inline">xₖ</span> and <span class="formula-inline">yₖ</span> differ. Which one does the command respond to?</li>
     </ol>
 
-    <h2>4. Почему появляется граница</h2>
-    <p>Без задержки <span class="formula-inline">yₖ=xₖ</span>. Подставим контроллер в переход состояния:</p>
+    <h2>4. Why a boundary appears</h2>
+    <p>Without delay, <span class="formula-inline">yₖ=xₖ</span>. Substitute the controller into the state transition:</p>
     <div class="formula">eₖ₊₁ = (1 − KₚΔt) · eₖ</div>
-    <p>Каждый шаг умножает ошибку на одно и то же число. Отсюда можно предсказать график ещё до запуска:</p>
+    <p>Every step multiplies the error by the same number. This lets us predict the graph before running it:</p>
     <div class="rule-grid">
-      <div><strong>0 &lt; KₚΔt ≤ 1</strong>Знак ошибки сохраняется, модуль уменьшается.</div>
-      <div><strong>1 &lt; KₚΔt &lt; 2</strong>Знак чередуется, модуль уменьшается.</div>
-      <div><strong>KₚΔt ≥ 2</strong>Модуль ошибки не уменьшается.</div>
+      <div><strong>0 &lt; KₚΔt ≤ 1</strong>The error keeps its sign and its magnitude decreases.</div>
+      <div><strong>1 &lt; KₚΔt &lt; 2</strong>The sign alternates and the magnitude decreases.</div>
+      <div><strong>KₚΔt ≥ 2</strong>The error magnitude does not decrease.</div>
     </div>
-    <p>Большой шаг означает, что устаревающая команда действует дольше до следующего измерения. При задержке контроллер получает ещё более старое <span class="formula-inline">yₖ=xₖ₋d</span>; простая граница выше уже не описывает всю систему.</p>
+    <p>A large step means that a command becoming outdated acts longer before the next measurement. With delay, the controller receives an even older <span class="formula-inline">yₖ=xₖ₋d</span>; the simple boundary above no longer describes the whole system.</p>
 
     <section class="card note">
-      <strong>Связь с реальностью.</strong> Для нашей модели интегратора переход точен, пока команда удерживается между измерениями. Для более сложной физики такая формула часто будет лишь численным приближением — и тогда придётся различать частоту контроллера и шаг физического симулятора.
+      <strong>Connection to reality.</strong> For our integrator model, the transition is exact while the command is held between measurements. For more complex physics, such a formula will often be only a numerical approximation, and we will need to distinguish the controller frequency from the physics simulator's time step.
     </section>
 
-    <h2>5. Проверка из памяти</h2>
-    <form class="card quiz" data-quiz data-correct="minimum" data-success="Верно: состояние хранит ровно то, чего достаточно для дальнейшего прогноза модели." data-retry="Подумай, что необходимо знать сейчас, а не что происходило когда-либо раньше.">
+    <h2>5. Recall check</h2>
+    <form class="card quiz" data-quiz data-correct="minimum" data-success="Correct: state stores exactly what is sufficient to predict the model's future." data-retry="Think about what must be known now, not everything that happened in the past.">
       <fieldset>
-        <legend>Как лучше всего описать состояние модели?</legend>
-        <label><input type="radio" name="q1" value="minimum"> Минимальная память для прогноза</label>
-        <label><input type="radio" name="q1" value="history"> Полная история всех команд</label>
-        <label><input type="radio" name="q1" value="command"> Только последняя команда привода</label>
+        <legend>What is the best description of a model's state?</legend>
+        <label><input type="radio" name="q1" value="minimum"> The minimal memory needed for prediction</label>
+        <label><input type="radio" name="q1" value="history"> The complete history of all commands</label>
+        <label><input type="radio" name="q1" value="command"> Only the actuator's most recent command</label>
       </fieldset>
-      <button type="submit">Проверить</button>
+      <button type="submit">Check</button>
       <p class="quiz-result" data-quiz-result aria-live="polite"></p>
     </form>
 
-    <form class="card quiz" data-quiz data-correct="past" data-success="Верно: задержанный сенсор сообщает прошлое состояние, хотя контроллер действует сейчас." data-retry="Сопоставь индексы в yₖ = xₖ₋d и попробуй ещё раз.">
+    <form class="card quiz" data-quiz data-correct="past" data-success="Correct: a delayed sensor reports a past state even though the controller acts now." data-retry="Compare the indices in yₖ = xₖ₋d, then try again.">
       <fieldset>
-        <legend>Что сообщает сенсор при ненулевой задержке?</legend>
-        <label><input type="radio" name="q2" value="past"> Прошлое состояние системы</label>
-        <label><input type="radio" name="q2" value="future"> Будущую цель системы</label>
-        <label><input type="radio" name="q2" value="command"> Текущую команду системы</label>
+        <legend>What does a sensor report when its delay is nonzero?</legend>
+        <label><input type="radio" name="q2" value="past"> A past state of the system</label>
+        <label><input type="radio" name="q2" value="future"> The system's future target</label>
+        <label><input type="radio" name="q2" value="command"> The system's current command</label>
       </fieldset>
-      <button type="submit">Проверить</button>
+      <button type="submit">Check</button>
       <p class="quiz-result" data-quiz-result aria-live="polite"></p>
     </form>
 
-    <h2>6. Твой короткий отчёт</h2>
+    <h2>6. Your short report</h2>
     <ol class="steps">
-      <li>Почему для катящегося мяча позиция без скорости — недостаточное состояние?</li>
-      <li>Почему увеличение <span class="formula-inline">Δt</span> может превратить приближение в расходящиеся перелёты?</li>
-      <li>При задержке контроллер вычисляет команду из <span class="formula-inline">xₖ</span> или <span class="formula-inline">yₖ</span>? В чём разница?</li>
+      <li>Why is position without velocity an insufficient state for a rolling ball?</li>
+      <li>Why can increasing <span class="formula-inline">Δt</span> turn convergence into diverging overshoots?</li>
+      <li>With delay, does the controller compute its command from <span class="formula-inline">xₖ</span> or <span class="formula-inline">yₖ</span>? What is the difference?</li>
     </ol>
-    <p>Ответь учителю через аннотации или в чате. После подтверждения этих трёх идей перейдём к позе <span class="formula-inline">(x, y, θ)</span> и первому колёсному роботу в 2D.</p>
+    <p>Answer the teacher through annotations or in chat. Once these three ideas are confirmed, we will move to pose <span class="formula-inline">(x, y, θ)</span> and the first wheeled robot in 2D.</p>
 
     <section class="card">
-      <strong>Для закрепления:</strong> рядом лежит <a href="../reference/state-and-discrete-time.html">шпаргалка по состоянию и дискретному времени</a>. Если график расходится неожиданно, пришли параметры <span class="formula-inline">Kₚ</span>, <span class="formula-inline">Δt</span> и задержку — разберём конкретную траекторию.
+      <strong>For reinforcement:</strong> use the nearby <a href="../reference/state-and-discrete-time.html">state and discrete-time reference</a>. If the graph diverges unexpectedly, send the <span class="formula-inline">Kₚ</span>, <span class="formula-inline">Δt</span>, and delay values so we can examine that specific trajectory.
     </section>
 
     <footer>
-      Основной источник: Åström &amp; Murray, <a href="https://fbswiki.org/wiki/index.php/System_Modeling"><em>Feedback Systems: System Modeling</em></a> — differential equations, difference equations и state-space models.
+      Primary source: Åström &amp; Murray, <a href="https://fbswiki.org/wiki/index.php/System_Modeling"><em>Feedback Systems: System Modeling</em></a> — differential equations, difference equations, and state-space models.
     </footer>
   </main>
   <script src="../assets/discrete-control.js"></script>

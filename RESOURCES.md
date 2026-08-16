@@ -3,26 +3,26 @@
 ## Knowledge
 
 - [Book and course: _Modern Robotics_ — Kevin Lynch and Frank Park](https://modernrobotics.northwestern.edu/nu-gm-book-resource/)
-  Строгая основа для конфигурационного пространства, движения твёрдых тел, кинематики, динамики, планирования и управления. Использовать как главный справочник по геометрии и манипуляторам.
+  A rigorous foundation for configuration space, rigid-body motion, kinematics, dynamics, planning, and control. Use it as the primary reference for geometry and manipulators.
 - [Book: _Introduction to Robotics and Perception_ — Frank Dellaert and Seth Hutchinson](https://www.roboticsbook.org/intro.html)
-  Вводный курс в исполняемых notebooks: от дискретных моделей до мобильных роботов, SLAM, дронов и perception. Использовать для проектных веток и вероятностной робототехники.
+  An introductory course in executable notebooks, ranging from discrete models to mobile robots, SLAM, drones, and perception. Use it for project branches and probabilistic robotics.
 - [Book: _Feedback Systems_, 2nd ed. — Karl Åström and Richard Murray](https://fbswiki.org/wiki/index.php/Feedback_Systems:_An_Introduction_for_Scientists_and_Engineers)
-  Свободно доступный университетский текст по моделям динамических систем и обратной связи. Использовать для control, устойчивости, оценки состояния и PID.
+  A freely available university text on dynamic-system models and feedback. Use it for control, stability, state estimation, and PID.
 - [Course notes: _Underactuated Robotics_ — Russ Tedrake, MIT](https://underactuated.mit.edu/)
-  Вычислительный взгляд на нелинейную динамику, оптимизацию и learning-based control через маятник, cart-pole, квадрокоптеры и ходьбу. Использовать после базового управления; особенно для динамических роботов.
+  A computational view of nonlinear dynamics, optimization, and learning-based control through pendulums, cart-poles, quadrotors, and walking. Use it after basic control, especially for dynamic robots.
 - [Webots User Guide — Cyberbotics](https://cyberbotics.com/doc/guide/index)
-  Официальная документация открытого 3D-симулятора с поддержкой Python и macOS. Использовать при переходе от собственных маленьких моделей к готовым роботам и физике.
+  Official documentation for an open 3D simulator with Python and macOS support. Use it when moving from custom small models to ready-made robots and physics.
 - [ROS 2 Lyrical Documentation](https://docs.ros.org/en/lyrical/)
-  Официальное описание ROS 2 и его коммуникационной модели. Использовать только когда проекты потребуют нескольких взаимодействующих компонентов и стандартного robotics-стека.
+  The official description of ROS 2 and its communication model. Use it only when projects require multiple interacting components and a standard robotics stack.
 
 ## Wisdom (Communities)
 
 - [Robotics Stack Exchange](https://robotics.stackexchange.com/)
-  Модерируемые технические вопросы по аппаратуре, управлению, симуляции и ROS. Использовать для конкретных инженерных затруднений с воспроизводимым примером.
+  Moderated technical questions about hardware, control, simulation, and ROS. Use it for specific engineering problems with a reproducible example.
 - [ROS Discourse](https://discourse.ros.org/)
-  Сообщество разработчиков ROS и robotics-инфраструктуры. Использовать для архитектурных практик и состояния экосистемы, когда дойдём до ROS.
+  A community of ROS and robotics-infrastructure developers. Use it for architectural practices and ecosystem status once the curriculum reaches ROS.
 
 ## Gaps
 
-- Конкретный класс первого физического робота пока неизвестен; аппаратные источники подберём после симуляционных проектов.
-- Не выбран основной 3D-симулятор: решение примем по требованиям первого проекта, а не заранее.
+- The specific class of the first physical robot is still unknown; choose hardware resources after completing simulation projects.
+- No primary 3D simulator has been selected; make that decision from the first project's requirements, not in advance.
