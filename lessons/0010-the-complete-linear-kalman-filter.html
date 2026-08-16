@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0010: The Complete Linear Kalman Filter</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=10">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0010 · 35 minutes</p>
+    <h1>The filter is a loop</h1>
+    <p class="lede">Prediction moves the estimate forward. A GPS measurement corrects it. The corrected estimate becomes the starting point for the next prediction.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will execute one complete position–velocity Kalman cycle and explain how a position-only GPS measurement can also correct estimated velocity.
+    </section>
+
+    <h2>1. Retrieve the trust rule</h2>
+    <form class="card quiz" data-quiz data-correct="measurement" data-empty="Choose an answer first." data-success="Correct: K near one applies almost the entire measurement innovation." data-retry="Recall which source pulls the estimate when K approaches one.">
+      <fieldset>
+        <legend>What does K near 1 mean?</legend>
+        <label><input type="radio" name="q1" value="measurement"> Trust the measurement more</label>
+        <label><input type="radio" name="q1" value="prediction"> Trust the prediction more</label>
+        <label><input type="radio" name="q1" value="ignore"> Ignore the measurement entirely</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <form class="card quiz" data-quiz data-correct="midpoint" data-empty="Choose an answer first." data-success="Correct: equal variances give K=0.5 and a midpoint correction." data-retry="Equal variance means equal influence from prediction and measurement.">
+      <fieldset>
+        <legend>If x̂⁻=10 m, z=12 m, and P⁻=R, where is x̂⁺?</legend>
+        <label><input type="radio" name="q2" value="midpoint"> At eleven metres exactly</label>
+        <label><input type="radio" name="q2" value="prediction"> At ten metres exactly</label>
+        <label><input type="radio" name="q2" value="measurement"> At twelve metres exactly</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>2. Four stages, repeated forever</h2>
+    <div class="loop">
+      <div>Corrected belief<br><span class="formula-inline">x̂⁺ₖ, P⁺ₖ</span></div>
+      <div>Predict motion<br><span class="formula-inline">x̂⁻ₖ₊₁, P⁻ₖ₊₁</span></div>
+      <div>Read GPS<br><span class="formula-inline">zₖ₊₁, R</span></div>
+      <div>Correct belief<br><span class="formula-inline">x̂⁺ₖ₊₁, P⁺ₖ₊₁</span></div>
+    </div>
+    <p>The filter is <strong>recursive</strong>: it does not keep every old state or error. The corrected pair <span class="formula-inline">(x̂⁺,P⁺)</span> summarizes what the next prediction needs. If no measurement arrives, the predicted pair simply continues into the next prediction.</p>
+
+    <p class="source">The general Bayes filter likewise alternates prediction and measurement phases while carrying only the previous belief. See <a href="https://www.roboticsbook.org/S44_logistics_perception.html"><em>Introduction to Robotics and Perception, 4.4: Localization</em></a>.</p>
+
+    <h2>3. Begin from one corrected belief</h2>
+    <p>At time <span class="formula-inline">k</span>, the robot's last corrected state is position <span class="formula-inline">0 m</span> and velocity <span class="formula-inline">1 m/s</span>:</p>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂⁺ₖ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>0</span><span>1</span></span></span>
+        <span>P⁺ₖ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>0.04</span><span>0</span><span>0</span><span>0.09</span></span></span>
+      </div>
+    </div>
+    <p>Use a one-second constant-velocity model. Unknown acceleration has <span class="formula-inline">σa=0.2 m/s²</span>:</p>
+    <div class="formula">
+      <div class="equation">
+        <span>F =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>1</span><span>1</span><span>0</span><span>1</span></span></span>
+        <span>Q =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>0.01</span><span>0.02</span><span>0.02</span><span>0.04</span></span></span>
+      </div>
+    </div>
+
+    <h2>4. Prediction</h2>
+    <div class="formula">x̂⁻ₖ₊₁ = F x̂⁺ₖ<br>P⁻ₖ₊₁ = F P⁺ₖ Fᵀ + Q</div>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂⁻ₖ₊₁ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>1</span><span>1</span></span></span>
+        <span>P⁻ₖ₊₁ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>0.14</span><span>0.11</span><span>0.11</span><span>0.13</span></span></span>
+      </div>
+    </div>
+    <p>The robot is predicted at <span class="formula-inline">1 m</span>. Position and velocity errors are now positively coupled: a possibility that moved farther is also likely to be faster.</p>
+
+    <h2>5. GPS arrives</h2>
+    <p>GPS measures only position, so <span class="formula-inline">H=[1 0]</span>. It reports <span class="formula-inline">z=1.2 m</span> with <span class="formula-inline">R=0.25 m²</span>.</p>
+    <div class="formula">
+      <div class="equation">
+        <span>H =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 2"><span>1</span><span>0</span></span></span>
+        <span>y = z − Hx̂⁻ = 1.2 − 1.0 = 0.2 m</span>
+      </div>
+    </div>
+    <div class="formula">S = H P⁻ Hᵀ + R = 0.14 + 0.25 = 0.39 m²</div>
+    <p><span class="formula-inline">S</span> is the expected variance of the innovation: prediction uncertainty and GPS uncertainty both contribute to the disagreement we expect to see.</p>
+
+    <h2>6. One innovation corrects two variables</h2>
+    <div class="formula">
+      <div class="equation">
+        <span>K = P⁻HᵀS⁻¹ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>0.359</span><span>0.282</span></span></span>
+      </div>
+    </div>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂⁺ = x̂⁻ + Ky =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>1.072 m</span><span>1.056 m/s</span></span></span>
+      </div>
+      <div class="equation">
+        <span>P⁺ = (I − KH)P⁻ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>0.090</span><span>0.071</span><span>0.071</span><span>0.099</span></span></span>
+      </div>
+    </div>
+    <section class="card note">
+      <strong>Why did velocity change?</strong> GPS did not measure velocity. But <span class="formula-inline">P⁻pv=0.11</span> says position and velocity errors are related, so the velocity gain is <span class="formula-inline">Kv=P⁻pv/S=0.282</span>. If that covariance were zero, <span class="formula-inline">Kv</span> would be zero and GPS position would not correct velocity.
+    </section>
+
+    <h2>7. Interactive recursive filter</h2>
+    <p>The simulated robot experiences unknown acceleration. The filter predicts every second, while GPS arrives only every fourth second.</p>
+    <section class="card simulator">
+      <canvas class="full-kalman-canvas" data-full-kalman-canvas aria-label="True position, Kalman estimate, uncertainty band, and periodic GPS measurements over time"></canvas>
+      <div class="legend">
+        <span><i class="swatch filter-truth"></i>True position</span>
+        <span><i class="swatch filter-estimate"></i>Filtered estimate</span>
+        <span><i class="swatch filter-band"></i>Estimate ±2σ</span>
+        <span><i class="mean-dot"></i>GPS measurement</span>
+      </div>
+
+      <div class="controls">
+        <label>
+          <span>Process acceleration σa: <output data-full-kalman-acceleration-sigma-output>0.15</output> m/s²</span>
+          <input data-full-kalman-acceleration-sigma type="range" min="0.05" max="0.40" value="0.15" step="0.05">
+        </label>
+        <label>
+          <span>GPS σz: <output data-full-kalman-measurement-sigma-output>0.40</output> m</span>
+          <input data-full-kalman-measurement-sigma type="range" min="0.10" max="1.20" value="0.40" step="0.05">
+        </label>
+      </div>
+
+      <div class="buttons">
+        <button data-full-kalman-step-button type="button">Advance one step</button>
+        <button data-full-kalman-gps-button type="button">Advance to next GPS</button>
+        <button data-full-kalman-run-button type="button">Run 20 steps</button>
+        <button data-full-kalman-reset class="secondary" type="button">Reset</button>
+      </div>
+
+      <div class="readout full-filter-readout">
+        <div>Step · event<strong data-full-kalman-step>0 · Initial posterior</strong></div>
+        <div>Estimate (p, v)<strong data-full-kalman-estimate>(0.00 m, 1.00 m/s)</strong></div>
+        <div>Truth (p, v)<strong data-full-kalman-truth>(0.00 m, 1.00 m/s)</strong></div>
+        <div>Current position σ<strong data-full-kalman-position-sigma>0.200 m</strong></div>
+        <div>Last GPS gain (Kp, Kv)<strong data-full-kalman-last-gain>—</strong></div>
+        <div>Last GPS σ⁻ → σ⁺<strong data-full-kalman-last-sigma>—</strong></div>
+        <div>Last GPS v⁻ → v⁺<strong data-full-kalman-last-velocity>—</strong></div>
+        <div>Last innovation<strong data-full-kalman-last-innovation>—</strong></div>
+      </div>
+
+      <div class="covariance-matrix" aria-label="Current position and velocity covariance matrix">
+        <span>P =</span>
+        <span class="matrix-bracket">[</span>
+        <span data-full-kalman-pp>0.040</span>
+        <span data-full-kalman-pv-a>0.000</span>
+        <span data-full-kalman-pv-b>0.000</span>
+        <span data-full-kalman-vv>0.090</span>
+        <span class="matrix-bracket">]</span>
+        <span></span>
+      </div>
+      <p class="muted small matrix-units"><span class="formula-inline">Ppp</span>: m² · <span class="formula-inline">Ppv</span>: m²/s · <span class="formula-inline">Pvv</span>: (m/s)²</p>
+      <p class="muted small" data-full-kalman-status aria-live="polite">Advance to the next GPS reading and compare uncertainty before and after correction.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Reset and press <strong>Advance one step</strong> three times. After each click, read <strong>Current position σ</strong>. Verify that it increases while <strong>Step · event</strong> says “Prediction only.”</li>
+      <li>Reset and press <strong>Advance to next GPS</strong>. In <strong>Last GPS σ⁻ → σ⁺</strong>, verify that the number after the arrow is smaller. This is the measurement correction reducing uncertainty.</li>
+      <li>At the same GPS event, inspect <strong>Last GPS gain (Kp, Kv)</strong> and <strong>Last GPS v⁻ → v⁺</strong>. Verify that <span class="formula-inline">Kv≠0</span> and velocity changes even though GPS measured only position.</li>
+      <li>Set <strong>GPS σz</strong> to <span class="formula-inline">0.15 m</span>, advance to GPS, and note <strong>Kp</strong>. Then reset, set it to <span class="formula-inline">1.00 m</span>, and repeat. Verify that the more precise GPS produces the larger <strong>Kp</strong>.</li>
+      <li>Reset and press <strong>Run 20 steps</strong>. Identify the repeated pattern: the blue uncertainty band expands between orange GPS dots and contracts at each correction.</li>
+    </ol>
+
+    <h2>8. The complete algorithm</h2>
+    <div class="formula">repeat each time step:<br>  x̂⁻ = F x̂⁺<br>  P⁻ = F P⁺ Fᵀ + Q<br><br>  if measurement z arrives:<br>    y = z − Hx̂⁻<br>    S = HP⁻Hᵀ + R<br>    K = P⁻HᵀS⁻¹<br>    x̂⁺ = x̂⁻ + Ky<br>    P⁺ = (I − KH)P⁻<br>  else:<br>    x̂⁺, P⁺ = x̂⁻, P⁻</div>
+    <p>That is the complete linear Kalman filter: the prediction from lesson 0008 and the uncertainty-weighted correction from lesson 0009, connected recursively.</p>
+
+    <h2>9. Model boundary</h2>
+    <p>This filter is exact and minimum-variance under its linear-Gaussian assumptions. A real robot may have nonlinear motion, biased sensors, outliers, or incorrectly tuned <span class="formula-inline">Q</span> and <span class="formula-inline">R</span>. The next lesson will apply the same predict–correct logic to robot localization and identify what changes for a planar pose.</p>
+
+    <p class="source">Primary sources: <a href="https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf">R. E. Kalman, <em>A New Approach to Linear Filtering and Prediction Problems</em></a>; Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S44_logistics_perception.html"><em>Localization</em></a>.</p>
+
+    <h2>10. Your short report</h2>
+    <ol class="steps">
+      <li>Why can a GPS measurement of position change the estimated velocity?</li>
+      <li>What exactly becomes the starting input for the next prediction?</li>
+      <li>What happens to position covariance between GPS measurements, and what happens when GPS arrives?</li>
+    </ol>
+    <p>Answer in English or Russian through chat. Ask me about any symbol, matrix entry, or simulator readout that remains unclear.</p>
+
+    <section class="card">
+      <strong>For review:</strong> use the <a href="../reference/complete-linear-kalman-filter.html">complete Kalman filter cheat sheet</a>. Revisit <a href="0008-predicting-state-and-uncertainty.html">prediction</a> or <a href="0009-kalman-gain-and-measurement-trust.html">measurement trust</a> if one half of the loop feels less familiar.
+    </section>
+
+    <footer>
+      Sources: Kalman, <a href="https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf"><em>A New Approach to Linear Filtering and Prediction Problems</em></a>; Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S44_logistics_perception.html"><em>Introduction to Robotics and Perception: Localization</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/position-velocity-kalman.js"></script>
+  <script src="../assets/full-kalman-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

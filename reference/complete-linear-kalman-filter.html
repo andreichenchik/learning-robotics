@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: Complete Linear Kalman Filter</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=10">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>Complete linear Kalman filter</h1>
+    <p class="lede">Carry one corrected Gaussian belief through repeated motion predictions and measurement corrections.</p>
+
+    <h2>Stored belief</h2>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂⁺ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>estimated position</span><span>estimated velocity</span></span></span>
+        <span>P⁺ = covariance of its error</span>
+      </div>
+    </div>
+    <p>The corrected pair <span class="formula-inline">(x̂⁺,P⁺)</span> is the filter's recursive memory.</p>
+
+    <h2>Prediction</h2>
+    <div class="formula">x̂⁻ = F x̂⁺<br>P⁻ = F P⁺ Fᵀ + Q</div>
+    <div class="rule-grid">
+      <div><strong>F</strong>Moves the state through the known model.</div>
+      <div><strong>F P Fᵀ</strong>Propagates existing uncertainty.</div>
+      <div><strong>Q</strong>Adds fresh process uncertainty.</div>
+    </div>
+
+    <h2>Measurement correction</h2>
+    <div class="formula">y = z − Hx̂⁻<br>S = HP⁻Hᵀ + R<br>K = P⁻HᵀS⁻¹<br>x̂⁺ = x̂⁻ + Ky<br>P⁺ = (I − KH)P⁻</div>
+    <div class="rule-grid">
+      <div><strong>H</strong>Maps state into sensor space.</div>
+      <div><strong>R</strong>Describes measurement-error covariance.</div>
+      <div><strong>K</strong>Maps innovation back into state correction.</div>
+    </div>
+
+    <h2>Position–velocity with position GPS</h2>
+    <div class="formula">
+      <div class="equation">
+        <span>F =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>1</span><span>Δt</span><span>0</span><span>1</span></span></span>
+        <span>H =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 2"><span>1</span><span>0</span></span></span>
+      </div>
+    </div>
+    <p>The velocity component of the gain is <span class="formula-inline">Kv=P⁻pv/S</span>. A position measurement corrects velocity only when position and velocity errors are coupled.</p>
+
+    <section class="card note">
+      <strong>Missing measurement.</strong> Keep the prediction as the current belief: <span class="formula-inline">x̂⁺←x̂⁻</span> and <span class="formula-inline">P⁺←P⁻</span>. Correct when a measurement becomes available.
+    </section>
+
+    <section class="card note">
+      <strong>Model boundary.</strong> Exact optimality requires linear motion and measurement models with correctly modeled Gaussian noise. Validate outliers and tune <span class="formula-inline">Q</span> and <span class="formula-inline">R</span> from evidence.
+    </section>
+
+    <footer>
+      Related lessons: <a href="../lessons/0010-the-complete-linear-kalman-filter.html">The filter is a loop</a>, <a href="../lessons/0008-predicting-state-and-uncertainty.html">Prediction moves uncertainty</a>, and <a href="../lessons/0009-kalman-gain-and-measurement-trust.html">Trust follows uncertainty</a>. Primary sources: <a href="https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf">Kalman 1960</a>; <a href="https://www.roboticsbook.org/S44_logistics_perception.html">Dellaert &amp; Hutchinson, Localization</a>.
+    </footer>
+  </main>
+</body>
+</html>
