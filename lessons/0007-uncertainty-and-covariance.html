@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0007: Uncertainty and Covariance</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=7">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0007 · 25 minutes</p>
+    <h1>Uncertainty has shape</h1>
+    <p class="lede">A state estimate is not merely a point. It is a claim about plausible errors—and in two dimensions, those errors can stretch and lean together.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will read a 2D covariance matrix, predict the orientation of its uncertainty ellipse, and distinguish estimated uncertainty from the robot's unknown actual error.
+    </section>
+
+    <h2>1. One estimate, many possible truths</h2>
+    <p>Suppose the estimated position is <span class="formula-inline">μ = (0, 0)</span>. That point is the centre of our belief, not a guarantee that the robot is there. Repeating the same experiment could produce different estimation errors around it.</p>
+    <div class="formula">error e = true state x − estimated mean μ</div>
+    <p>The <strong>actual error</strong> is one unknown vector in the current run. <strong>Uncertainty</strong> describes the spread we expect across plausible errors before seeing the truth. A consistent estimator should not report a narrow belief while routinely making large errors.</p>
+
+    <h2>2. Covariance records spread and co-variation</h2>
+    <p>For a two-dimensional position, the covariance matrix is the expected outer product of the error with itself:</p>
+    <div class="formula">Σ = E[e eᵀ] = [ σx²   σxy ]<br>                [ σxy   σy² ]</div>
+    <div class="rule-grid">
+      <div><strong>σx²</strong>Variance of the x error. Larger means wider horizontal spread.</div>
+      <div><strong>σy²</strong>Variance of the y error. Larger means wider vertical spread.</div>
+      <div><strong>σxy</strong>Covariance. Its sign says how x and y errors vary together.</div>
+    </div>
+    <p>Position variance and covariance have squared units: if position is measured in metres, these entries use <span class="formula-inline">m²</span>. Standard deviation returns to metres through <span class="formula-inline">σ = √variance</span>.</p>
+
+    <h2>3. Correlation makes the shape readable</h2>
+    <div class="formula">ρ = σxy / (σx σy), &nbsp; −1 ≤ ρ ≤ 1</div>
+    <p>Correlation is normalized covariance. When <span class="formula-inline">ρ &gt; 0</span>, positive x errors tend to accompany positive y errors, so the cloud leans along an upward diagonal. When <span class="formula-inline">ρ &lt; 0</span>, their signs tend to oppose each other. Zero covariance removes the lean, but it does not require equal uncertainty in both directions.</p>
+
+    <p class="source">Primary source: <a href="https://www.roboticsbook.org/S41_logistics_state.html"><em>Introduction to Robotics and Perception, 4.1: Continuous State</em></a> defines multivariate Gaussian state uncertainty using a mean vector and covariance matrix, then shows how covariance determines its elliptical contours.</p>
+
+    <h2>4. The ellipse is a contour, not a fence</h2>
+    <p>For a Gaussian belief, points with equal covariance-scaled distance from the mean form an ellipse:</p>
+    <div class="formula">d² = (x − μ)ᵀ Σ⁻¹ (x − μ)</div>
+    <p>The ellipse <span class="formula-inline">d=1</span> follows the principal one-standard-deviation axes. In 2D it contains only about 39% of a Gaussian's probability—not 68%, which is the familiar one-dimensional result. The <span class="formula-inline">d=2</span> ellipse contains about 86%. Neither contour guarantees where the true state lies.</p>
+    <p class="source">Why these percentages differ from 1D: <span class="formula-inline">d²</span> is the sum of two squared standard-normal coordinates, so it follows a chi-square distribution with two degrees of freedom; see the <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3666.htm">NIST chi-square distribution reference</a>.</p>
+
+    <h2>5. Interactive lab</h2>
+    <section class="card simulator">
+      <canvas class="covariance-canvas" data-uncertainty-canvas aria-label="Samples and covariance ellipses for a two-dimensional Gaussian belief"></canvas>
+      <div class="legend">
+        <span><i class="swatch uncertainty-one"></i>1σ contour</span>
+        <span><i class="swatch uncertainty-two"></i>2σ contour</span>
+        <span><i class="mean-dot"></i>Mean μ</span>
+      </div>
+
+      <div class="controls">
+        <label>
+          <span>x standard deviation σx: <output data-uncertainty-x-output>0.80</output> m</span>
+          <input data-uncertainty-x-standard-deviation type="range" min="0.15" max="1.40" value="0.80" step="0.05">
+        </label>
+        <label>
+          <span>y standard deviation σy: <output data-uncertainty-y-output>0.35</output> m</span>
+          <input data-uncertainty-y-standard-deviation type="range" min="0.15" max="1.40" value="0.35" step="0.05">
+        </label>
+        <label>
+          <span>Correlation ρ: <output data-uncertainty-correlation-output>0.00</output></span>
+          <input data-uncertainty-correlation type="range" min="-0.90" max="0.90" value="0" step="0.05">
+        </label>
+      </div>
+
+      <div class="preset-grid">
+        <button data-uncertainty-independent type="button">Independent</button>
+        <button data-uncertainty-positive type="button">Positive</button>
+        <button data-uncertainty-negative type="button">Negative</button>
+        <button data-uncertainty-isotropic type="button">Isotropic</button>
+      </div>
+
+      <div class="covariance-matrix" aria-label="Current covariance matrix">
+        <span>Σ =</span>
+        <span class="matrix-bracket">[</span>
+        <span data-uncertainty-xx>0.64</span>
+        <span data-uncertainty-xy-a>0.00</span>
+        <span data-uncertainty-xy-b>0.00</span>
+        <span data-uncertainty-yy>0.12</span>
+        <span class="matrix-bracket">]</span>
+        <span>m²</span>
+      </div>
+
+      <div class="readout uncertainty-readout">
+        <div>Major-axis angle<strong data-uncertainty-angle>0°</strong></div>
+        <div>Samples inside 1σ<strong data-uncertainty-inside>39.0%</strong></div>
+      </div>
+      <p class="muted small" data-uncertainty-status aria-live="polite">Change one parameter at a time and predict the ellipse before looking.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Select <strong>Independent</strong>. Increase only <span class="formula-inline">σy</span>. Predict which matrix entry and ellipse axis will change.</li>
+      <li>Select <strong>Positive</strong>, then <strong>Negative</strong>. The diagonal variances remain equal; explain why only the ellipse's lean reverses.</li>
+      <li>Select <strong>Isotropic</strong>. Change correlation away from zero. Why does equal marginal variance no longer produce a circle?</li>
+      <li>Try several shapes and watch the fraction inside the green contour. Why does its orientation change while the fraction stays near 39%?</li>
+    </ol>
+
+    <h2>6. What covariance cannot say</h2>
+    <p>Mean and covariance fully specify a Gaussian belief, but not an arbitrary belief. One ellipse cannot faithfully represent two separate candidate locations, heavy tails, or a hard obstacle boundary. Covariance also predicts typical error; it does not reveal the unknown error of this particular run.</p>
+    <p>This limitation will matter during localization: a robot that could be in either of two similar corridors has a multimodal belief, not one elliptical cloud.</p>
+
+    <h2>7. Check from memory</h2>
+    <form class="card quiz" data-quiz data-correct="variance" data-empty="Choose an answer first." data-success="Correct: diagonal entries are marginal error variances." data-retry="Separate the centre of the belief from its spread.">
+      <fieldset>
+        <legend>What do the diagonal covariance entries represent?</legend>
+        <label><input type="radio" name="q1" value="variance"> Variance of each coordinate</label>
+        <label><input type="radio" name="q1" value="mean"> Average of each coordinate</label>
+        <label><input type="radio" name="q1" value="bias"> Bias within each coordinate</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <form class="card quiz" data-quiz data-correct="together" data-empty="Choose an answer first." data-success="Correct: positive covariance favours errors with matching signs." data-retry="Think about which quadrants contain the elongated cloud.">
+      <fieldset>
+        <legend>What does positive covariance between x and y errors suggest?</legend>
+        <label><input type="radio" name="q2" value="together"> Errors tend to move together</label>
+        <label><input type="radio" name="q2" value="equal"> Errors always become equally large</label>
+        <label><input type="radio" name="q2" value="mean"> Coordinates have identical mean values</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>8. Your short report</h2>
+    <ol class="steps">
+      <li>Two estimators report the same mean position but different covariance matrices. What is the same, and what differs?</li>
+      <li>What pattern of x and y errors produces a positive off-diagonal covariance?</li>
+      <li>Why does a 2σ ellipse not guarantee that the true position lies inside it?</li>
+    </ol>
+    <p>Answer in English or Russian through chat. Ask me about any equation or visual that remains unclear. After your reasoning is confirmed, we will propagate covariance through a motion model and introduce process noise <span class="formula-inline">Q</span>.</p>
+
+    <section class="card">
+      <strong>For review:</strong> use the <a href="../reference/uncertainty-and-covariance.html">uncertainty and covariance cheat sheet</a>. Revisit <a href="0006-external-pose-corrections.html">external pose corrections</a> to see why an estimator needs more than a fixed correction weight.
+    </section>
+
+    <footer>
+      Sources: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S41_logistics_state.html"><em>Introduction to Robotics and Perception: Continuous State</em></a>; <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3666.htm">NIST, <em>Chi-Square Distribution</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/covariance.js"></script>
+  <script src="../assets/uncertainty-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

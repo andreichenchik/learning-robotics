@@ -115,6 +115,7 @@ code, .formula { font-family: "SFMono-Regular", Consolas, monospace; }
   background: #eef3ed;
 }
 .simulator canvas.pose-canvas { height: 420px; touch-action: none; cursor: crosshair; }
+.simulator canvas.covariance-canvas { height: 460px; }
 
 .controls {
   display: grid;
@@ -153,6 +154,7 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
 .readout.pose-readout { grid-template-columns: repeat(4, 1fr); }
 .readout.odometry-readout { grid-template-columns: repeat(3, 1fr); }
 .readout.correction-readout { grid-template-columns: repeat(3, 1fr); }
+.readout.uncertainty-readout { grid-template-columns: repeat(2, 1fr); }
 
 .legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .8rem 0 0; }
 .legend span { display: inline-flex; align-items: center; gap: .4rem; }
@@ -160,6 +162,33 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
 .swatch.truth { border-color: var(--green); }
 .swatch.estimate { border-color: var(--blue); border-top-style: dashed; }
 .swatch.measurement { border-color: var(--amber); border-top-style: dotted; }
+.swatch.uncertainty-one { border-color: var(--green); }
+.swatch.uncertainty-two { border-color: var(--blue); border-top-style: dashed; }
+.mean-dot { width: .75rem; height: .75rem; border-radius: 50%; background: var(--amber); }
+
+.covariance-matrix {
+  display: grid;
+  grid-template-columns: auto auto 4.5rem 4.5rem auto auto;
+  grid-template-areas:
+    "name left xx xy1 right units"
+    "name left xy2 yy right units";
+  justify-content: center;
+  align-items: center;
+  gap: .15rem .7rem;
+  margin: 1.4rem 0 1rem;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.covariance-matrix > :nth-child(1) { grid-area: name; }
+.covariance-matrix > :nth-child(2) { grid-area: left; }
+.covariance-matrix > :nth-child(3) { grid-area: xx; }
+.covariance-matrix > :nth-child(4) { grid-area: xy1; }
+.covariance-matrix > :nth-child(5) { grid-area: xy2; }
+.covariance-matrix > :nth-child(6) { grid-area: yy; }
+.covariance-matrix > :nth-child(7) { grid-area: right; }
+.covariance-matrix > :nth-child(8) { grid-area: units; }
+.matrix-bracket { font-size: 2.9rem; line-height: 1; transform: scaleY(1.25); }
 
 .preset-grid {
   display: grid;
@@ -204,8 +233,10 @@ footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line
   .loop div:nth-child(2)::after { content: "↓"; right: 50%; bottom: -.95rem; top: auto; }
   .loop div:nth-child(3)::after { content: "←"; right: auto; left: -.7rem; }
   .controls, .readout, .readout.pose-readout, .readout.odometry-readout,
-  .readout.correction-readout { grid-template-columns: 1fr; }
+  .readout.correction-readout, .readout.uncertainty-readout { grid-template-columns: 1fr; }
   .preset-grid, .rule-grid { grid-template-columns: 1fr; }
+  .simulator canvas.covariance-canvas { height: 340px; }
+  .covariance-matrix { grid-template-columns: auto auto 3.8rem 3.8rem auto auto; gap: .1rem .35rem; }
 }
 
 @media print {

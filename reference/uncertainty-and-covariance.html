@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: Uncertainty and Covariance</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=7">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>Uncertainty and covariance</h1>
+    <p class="lede">Read a Gaussian state belief from its centre, marginal spreads, and coupled errors.</p>
+
+    <h2>Belief and error</h2>
+    <div class="formula">x ∼ N(μ, Σ)<br>e = x − μ</div>
+    <p><span class="formula-inline">μ</span> is the estimated centre. The actual error <span class="formula-inline">e</span> is unknown; <span class="formula-inline">Σ</span> describes the expected pattern of plausible errors.</p>
+
+    <h2>Two-dimensional covariance</h2>
+    <div class="formula">Σ = E[e eᵀ] = [ σx²   σxy ]<br>                [ σxy   σy² ]</div>
+    <div class="rule-grid">
+      <div><strong>Diagonal</strong>Marginal variances; squared units.</div>
+      <div><strong>Off-diagonal</strong>Error co-variation; symmetric entries.</div>
+      <div><strong>Standard deviation</strong>Square root of variance; state units.</div>
+    </div>
+
+    <h2>Covariance and correlation</h2>
+    <div class="formula">σxy = ρ σx σy<br>−1 ≤ ρ ≤ 1</div>
+    <div class="rule-grid">
+      <div><strong>ρ &gt; 0</strong>x and y errors tend to share a sign.</div>
+      <div><strong>ρ = 0</strong>No linear co-variation; ellipse is axis-aligned.</div>
+      <div><strong>ρ &lt; 0</strong>x and y errors tend to oppose signs.</div>
+    </div>
+
+    <h2>Ellipse interpretation</h2>
+    <div class="formula">d² = (x − μ)ᵀ Σ⁻¹ (x − μ)</div>
+    <p>Constant <span class="formula-inline">d</span> gives a Gaussian density contour. Eigenvectors of <span class="formula-inline">Σ</span> give its directions; square roots of eigenvalues give principal standard deviations.</p>
+
+    <table class="data-table">
+      <thead><tr><th>2D contour</th><th>Gaussian probability inside</th></tr></thead>
+      <tbody><tr><td>d = 1</td><td>≈ 39.3%</td></tr><tr><td>d = 2</td><td>≈ 86.5%</td></tr></tbody>
+    </table>
+    <p class="source">For a 2D Gaussian, <span class="formula-inline">d²</span> follows a chi-square distribution with two degrees of freedom. See the <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3666.htm">NIST definition and cumulative distribution</a>.</p>
+
+    <section class="card note">
+      <strong>Do not confuse these.</strong> Covariance is the estimator's modeled uncertainty, not its current unknown error. An ellipse is a probability contour, not a hard boundary.
+    </section>
+
+    <section class="card note">
+      <strong>Model boundary.</strong> One mean and covariance cannot represent multiple separated candidate locations. Gaussian localization requires a roughly unimodal belief.
+    </section>
+
+    <footer>
+      Related lesson: <a href="../lessons/0007-uncertainty-and-covariance.html">Uncertainty has shape</a>. Primary source: <a href="https://www.roboticsbook.org/S41_logistics_state.html">Dellaert &amp; Hutchinson, Continuous State</a>.
+    </footer>
+  </main>
+</body>
+</html>
