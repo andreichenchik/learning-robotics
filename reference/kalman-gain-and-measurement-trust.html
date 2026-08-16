@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: Kalman Gain and Measurement Trust</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=9">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>Kalman measurement correction</h1>
+    <p class="lede">Combine a prediction with a noisy direct measurement using their variances.</p>
+
+    <h2>Scalar correction</h2>
+    <div class="formula">innovation = z − x̂⁻<br>K = P⁻ / (P⁻ + R)<br>x̂⁺ = x̂⁻ + K(z − x̂⁻)<br>P⁺ = (1 − K)P⁻</div>
+
+    <div class="rule-grid">
+      <div><strong>x̂⁻, P⁻</strong>Predicted mean and variance before the measurement.</div>
+      <div><strong>z, R</strong>Measured value and its error variance.</div>
+      <div><strong>x̂⁺, P⁺</strong>Corrected mean and variance after the measurement.</div>
+    </div>
+
+    <h2>Trust rule</h2>
+    <div class="rule-grid">
+      <div><strong>P⁻ ≫ R</strong>K approaches 1; trust the measurement.</div>
+      <div><strong>P⁻ = R</strong>K equals 0.5; split the innovation equally.</div>
+      <div><strong>P⁻ ≪ R</strong>K approaches 0; trust the prediction.</div>
+    </div>
+
+    <section class="card note">
+      <strong>Separate value from confidence.</strong> The innovation changes when <span class="formula-inline">z</span> changes. The gain and corrected variance change only when <span class="formula-inline">P⁻</span> or <span class="formula-inline">R</span> changes.
+    </section>
+
+    <h2>Matrix correction</h2>
+    <div class="formula">y = z − Hx̂⁻<br>S = HP⁻Hᵀ + R<br>K = P⁻HᵀS⁻¹<br>x̂⁺ = x̂⁻ + Ky<br>P⁺ = (I − KH)P⁻</div>
+    <p><span class="formula-inline">H</span> maps the state into the quantity the sensor measures. <span class="formula-inline">S</span> is the expected innovation covariance.</p>
+
+    <h2>Assumptions</h2>
+    <p>The standard Kalman correction assumes a correct linear measurement model and unbiased, independent Gaussian noise. Validate extreme innovations before accepting a measurement in a real robot.</p>
+
+    <footer>
+      Related lessons: <a href="../lessons/0009-kalman-gain-and-measurement-trust.html">Trust follows uncertainty</a> and <a href="../lessons/0008-predicting-state-and-uncertainty.html">Prediction moves uncertainty</a>. Primary sources: <a href="https://www.roboticsbook.org/S43_logistics_sensing.html">Dellaert &amp; Hutchinson, Sensors for Mobile Robots</a>; <a href="https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf">Kalman 1960</a>.
+    </footer>
+  </main>
+</body>
+</html>

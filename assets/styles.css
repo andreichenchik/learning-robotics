@@ -150,6 +150,7 @@ code, .formula { font-family: "SFMono-Regular", Consolas, monospace; }
 .simulator canvas.pose-canvas { height: 420px; touch-action: none; cursor: crosshair; }
 .simulator canvas.covariance-canvas { height: 460px; }
 .simulator canvas.prediction-canvas { height: 440px; }
+.simulator canvas.kalman-canvas { height: 310px; }
 
 .controls {
   display: grid;
@@ -190,6 +191,7 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
 .readout.correction-readout { grid-template-columns: repeat(3, 1fr); }
 .readout.uncertainty-readout { grid-template-columns: repeat(2, 1fr); }
 .readout.prediction-readout { grid-template-columns: repeat(3, 1fr); }
+.readout.kalman-readout { grid-template-columns: repeat(4, 1fr); }
 
 .legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .8rem 0 0; }
 .legend span { display: inline-flex; align-items: center; gap: .4rem; }
@@ -199,6 +201,9 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
 .swatch.measurement { border-color: var(--amber); border-top-style: dotted; }
 .swatch.uncertainty-one { border-color: var(--green); }
 .swatch.uncertainty-two { border-color: var(--blue); border-top-style: dashed; }
+.swatch.kalman-prediction { border-color: var(--blue); }
+.swatch.kalman-measurement { border-color: var(--amber); }
+.swatch.kalman-corrected { border-color: var(--green); border-top-width: 4px; }
 .mean-dot { width: .75rem; height: .75rem; border-radius: 50%; background: var(--amber); }
 .mean-cross { width: 1rem; height: 1rem; position: relative; }
 .mean-cross::before, .mean-cross::after {
@@ -281,10 +286,11 @@ footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line
   .loop div:nth-child(3)::after { content: "←"; right: auto; left: -.7rem; }
   .controls, .readout, .readout.pose-readout, .readout.odometry-readout,
   .readout.correction-readout, .readout.uncertainty-readout,
-  .readout.prediction-readout { grid-template-columns: 1fr; }
+  .readout.prediction-readout, .readout.kalman-readout { grid-template-columns: 1fr; }
   .preset-grid, .rule-grid { grid-template-columns: 1fr; }
   .simulator canvas.covariance-canvas { height: 340px; }
   .simulator canvas.prediction-canvas { height: 360px; }
+  .simulator canvas.kalman-canvas { height: 280px; }
   .covariance-matrix { grid-template-columns: auto auto 3.8rem 3.8rem auto auto; gap: .1rem .35rem; }
   .formula { padding: .9rem 1rem; }
   .equation { gap: .5rem; }

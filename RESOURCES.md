@@ -6,6 +6,8 @@
   A rigorous foundation for configuration space, rigid-body motion, kinematics, dynamics, planning, and control. Use it as the primary reference for geometry and manipulators.
 - [Book: _Introduction to Robotics and Perception_ — Frank Dellaert and Seth Hutchinson](https://www.roboticsbook.org/intro.html)
   An introductory course in executable notebooks, ranging from discrete models to mobile robots, SLAM, drones, and perception. Use it for project branches and probabilistic robotics.
+- [Paper: _A New Approach to Linear Filtering and Prediction Problems_ — R. E. Kalman](https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf)
+  The original recursive linear state-estimation paper. Use it as the theoretical source for prediction, measurement correction, and covariance recursion.
 - [Book: _Feedback Systems_, 2nd ed. — Karl Åström and Richard Murray](https://fbswiki.org/wiki/index.php/Feedback_Systems:_An_Introduction_for_Scientists_and_Engineers)
   A freely available university text on dynamic-system models and feedback. Use it for control, stability, state estimation, and PID.
 - [Course notes: _Underactuated Robotics_ — Russ Tedrake, MIT](https://underactuated.mit.edu/)

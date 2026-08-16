@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0009: Kalman Gain and Measurement Trust</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=9">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0009 · 30 minutes</p>
+    <h1>Trust follows uncertainty</h1>
+    <p class="lede">A prediction and a GPS reading disagree. The Kalman gain turns their uncertainties into a correction weight.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will compute one scalar Kalman correction, explain why its gain changes, and predict which source will pull the corrected position more strongly.
+    </section>
+
+    <h2>1. One robot, one GPS reading</h2>
+    <p>After prediction, the robot believes it is at <span class="formula-inline">10.0 m</span>. Its predicted position standard deviation is <span class="formula-inline">σ⁻=0.5 m</span>. GPS reports <span class="formula-inline">z=10.8 m</span> with standard deviation <span class="formula-inline">σz=0.3 m</span>.</p>
+    <div class="rule-grid">
+      <div><strong>Prediction</strong>x̂⁻ = 10.0 m<br>P⁻ = 0.5² = 0.25 m²</div>
+      <div><strong>Measurement</strong>z = 10.8 m<br>R = 0.3² = 0.09 m²</div>
+      <div><strong>Question</strong>How far should GPS move the estimate?</div>
+    </div>
+    <p><span class="formula-inline">P⁻</span> came from the prediction step in the previous lesson. <span class="formula-inline">R</span> describes GPS measurement-error variance and comes from calibration, repeated tests against ground truth, or the sensor specification—not from this single reading.</p>
+
+    <h2>2. Measure the disagreement</h2>
+    <p>The <strong>innovation</strong> is what the sensor observed minus what the prediction expected:</p>
+    <div class="formula">innovation = z − x̂⁻ = 10.8 − 10.0 = 0.8 m</div>
+    <p>It says the GPS reading is <span class="formula-inline">0.8 m</span> ahead. It does not yet say whether that discrepancy is believable.</p>
+
+    <h2>3. Turn uncertainty into trust</h2>
+    <div class="formula">K = P⁻ / (P⁻ + R) = 0.25 / (0.25 + 0.09) ≈ 0.735</div>
+    <p>The scalar Kalman gain <span class="formula-inline">K</span> is between zero and one. It is the fraction of the innovation applied to the prediction:</p>
+    <div class="rule-grid">
+      <div><strong>K near 0</strong>Prediction is more precise; barely react to GPS.</div>
+      <div><strong>K = 0.5</strong>Both have equal variance; move halfway.</div>
+      <div><strong>K near 1</strong>GPS is more precise; move close to it.</div>
+    </div>
+    <section class="card note">
+      <strong>Variance means uncertainty here.</strong> A larger <span class="formula-inline">P⁻</span> makes <span class="formula-inline">K</span> larger because the prediction deserves less trust. A larger <span class="formula-inline">R</span> makes <span class="formula-inline">K</span> smaller because the measurement deserves less trust.
+    </section>
+
+    <h2>4. Correct the estimate</h2>
+    <div class="formula">x̂⁺ = x̂⁻ + K(z − x̂⁻)<br>x̂⁺ = 10.0 + 0.735 × 0.8 ≈ 10.588 m</div>
+    <p>The corrected estimate lies between the two inputs and closer to GPS because GPS has the smaller variance.</p>
+    <div class="formula">P⁺ = (1 − K)P⁻ ≈ 0.066 m²<br>σ⁺ = √P⁺ ≈ 0.257 m</div>
+    <p>Combining the two independent sources produces a more precise estimate than either source alone in this model. Notice that <span class="formula-inline">P⁺</span> depends on <span class="formula-inline">P⁻</span> and <span class="formula-inline">R</span>, not on whether this particular innovation was <span class="formula-inline">0.8 m</span> or <span class="formula-inline">−0.8 m</span>.</p>
+
+    <p class="source">Primary source: <a href="https://www.roboticsbook.org/S43_logistics_sensing.html"><em>Introduction to Robotics and Perception, 4.3: Sensors for Mobile Robots</em></a> defines a linear measurement with additive Gaussian noise and covariance <span class="formula-inline">R</span>. The recursive correction traces to <a href="https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf">Kalman's original 1960 paper</a>.</p>
+
+    <h2>5. Interactive lab</h2>
+    <section class="card simulator">
+      <canvas class="kalman-canvas" data-kalman-canvas aria-label="Prediction, GPS measurement, and corrected position distributions"></canvas>
+      <div class="legend">
+        <span><i class="swatch kalman-prediction"></i>Prediction</span>
+        <span><i class="swatch kalman-measurement"></i>GPS measurement</span>
+        <span><i class="swatch kalman-corrected"></i>Corrected estimate</span>
+      </div>
+
+      <div class="controls">
+        <label>
+          <span>Predicted position x̂⁻: <output data-kalman-predicted-mean-output>10.0</output> m</span>
+          <input data-kalman-predicted-mean type="range" min="7" max="13" value="10" step="0.1">
+        </label>
+        <label>
+          <span>GPS measurement z: <output data-kalman-measurement-output>10.8</output> m</span>
+          <input data-kalman-measurement type="range" min="7" max="13" value="10.8" step="0.1">
+        </label>
+        <label>
+          <span>Prediction σ⁻: <output data-kalman-predicted-sigma-output>0.50</output> m</span>
+          <input data-kalman-predicted-sigma type="range" min="0.1" max="1.5" value="0.5" step="0.05">
+        </label>
+        <label>
+          <span>GPS σz: <output data-kalman-measurement-sigma-output>0.30</output> m</span>
+          <input data-kalman-measurement-sigma type="range" min="0.1" max="1.5" value="0.3" step="0.05">
+        </label>
+      </div>
+
+      <div class="preset-grid scenario-grid">
+        <button data-kalman-preset data-predicted-sigma="0.5" data-measurement-sigma="0.5" type="button">Equal uncertainty</button>
+        <button data-kalman-preset data-predicted-sigma="1" data-measurement-sigma="0.2" type="button">Precise GPS</button>
+        <button data-kalman-preset data-predicted-sigma="0.2" data-measurement-sigma="1" type="button">Noisy GPS</button>
+      </div>
+
+      <div class="readout kalman-readout">
+        <div>Innovation z − x̂⁻<strong data-kalman-innovation>0.80 m</strong></div>
+        <div>Kalman gain K<strong data-kalman-gain>0.735</strong></div>
+        <div>Corrected x̂⁺<strong data-kalman-corrected-mean>10.588 m</strong></div>
+        <div>Corrected σ⁺<strong data-kalman-corrected-sigma>0.257 m</strong></div>
+      </div>
+      <p class="muted small" data-kalman-status aria-live="polite">The measurement has more influence than the prediction.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Choose <strong>Equal uncertainty</strong>. Verify that the <strong>Kalman gain K</strong> readout is <span class="formula-inline">0.500</span> and <strong>Corrected x̂⁺</strong> is halfway between the two means.</li>
+      <li>Choose <strong>Precise GPS</strong>. Verify that <strong>K</strong> is near one and <strong>Corrected x̂⁺</strong> lies close to the GPS measurement.</li>
+      <li>Choose <strong>Noisy GPS</strong>. Verify that <strong>K</strong> is near zero and <strong>Corrected x̂⁺</strong> stays close to the prediction.</li>
+      <li>Keep both uncertainty sliders fixed and move only <strong>GPS measurement z</strong>. Verify that <strong>Corrected x̂⁺</strong> changes while <strong>K</strong> and <strong>Corrected σ⁺</strong> remain constant. This separates the observed discrepancy from confidence in the sensors.</li>
+    </ol>
+
+    <h2>6. The same correction in matrix form</h2>
+    <p>If the state contains position and velocity but GPS observes only position, the measurement matrix selects the position entry:</p>
+    <div class="formula">
+      <div class="equation">
+        <span>x =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>position</span><span>velocity</span></span></span>
+        <span>H =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 2"><span>1</span><span>0</span></span></span>
+      </div>
+    </div>
+    <div class="formula">innovation: y = z − Hx̂⁻<br>expected innovation variance: S = HP⁻Hᵀ + R<br>gain: K = P⁻HᵀS⁻¹<br>correction: x̂⁺ = x̂⁻ + Ky<br>covariance: P⁺ = (I − KH)P⁻</div>
+    <p>The scalar equations were not a different algorithm. They were this matrix form with a one-value state and <span class="formula-inline">H=1</span>. In the next lesson, we will execute the complete predict–measure loop.</p>
+
+    <h2>7. Model boundary</h2>
+    <p>This result assumes unbiased, independent Gaussian errors and a correct value of <span class="formula-inline">R</span>. A broken GPS reading can still pull the estimate strongly if the filter claims GPS is precise. Real systems therefore validate innovations and tune noise models from data.</p>
+
+    <h2>8. Check from memory</h2>
+    <form class="card quiz" data-quiz data-correct="measurement" data-empty="Choose an answer first." data-success="Correct: smaller R gives the measurement more influence." data-retry="Compare R with P⁻: smaller variance means greater trust.">
+      <fieldset>
+        <legend>If R becomes much smaller than P⁻, what should the filter do?</legend>
+        <label><input type="radio" name="q1" value="measurement"> Trust the measurement more</label>
+        <label><input type="radio" name="q1" value="prediction"> Trust the prediction more</label>
+        <label><input type="radio" name="q1" value="equal"> Trust both sources equally</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>9. Your short report</h2>
+    <ol class="steps">
+      <li>Why does increasing measurement variance <span class="formula-inline">R</span> make the Kalman gain smaller?</li>
+      <li>If <span class="formula-inline">P⁻=R</span>, where will the corrected mean lie and why?</li>
+      <li>Why can a physically impossible GPS outlier still corrupt this filter?</li>
+    </ol>
+    <p>Answer in English or Russian through chat. Ask me about any symbol, equation, or plot that remains unclear.</p>
+
+    <section class="card">
+      <strong>For review:</strong> use the <a href="../reference/kalman-gain-and-measurement-trust.html">Kalman correction cheat sheet</a>. Revisit <a href="0008-predicting-state-and-uncertainty.html">prediction and process noise</a> for where <span class="formula-inline">P⁻</span> comes from.
+    </section>
+
+    <footer>
+      Sources: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S43_logistics_sensing.html"><em>Sensors for Mobile Robots</em></a>; Kalman, <a href="https://www.cs.cmu.edu/~motionplanning/papers/sbp_papers/k/Kalman1960.pdf"><em>A New Approach to Linear Filtering and Prediction Problems</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/scalar-kalman.js"></script>
+  <script src="../assets/kalman-gain-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
