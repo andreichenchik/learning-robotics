@@ -10,3 +10,4 @@
 - Feedback after lesson 0007: covariance felt too abstract. Future estimation lessons should begin with one concrete robot state and a numerical predict–measure example before introducing matrix notation or geometric interpretation.
 - After the five-lesson state-estimation sequence, transition to practical tasks in which the learner writes the main code and receives requirements, tests, and feedback rather than another sequence of prepared simulators.
 - Do not ask the learner to choose technical presentation implementations such as math-rendering technology. Own those decisions and use consistent, readable, reusable visual components across lessons.
+- Feedback after lesson 0008: prompts such as “compare analytic spread with the sample cloud” are too implicit. Name the exact readouts to compare, state what relationship to look for, and explain why the comparison matters.
