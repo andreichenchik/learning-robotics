@@ -31,3 +31,7 @@ _Avoid_: Step number, index `k`
 **Measurement delay**:
 The lag between an available measurement and the system's current state.
 _Avoid_: Sensor error, sensor noise
+
+**Covariance matrix**:
+A matrix describing the expected spread and linear coupling of state-estimation errors. Diagonal entries are marginal error variances; off-diagonal entries describe how signed errors tend to vary together.
+_Avoid_: The current actual error, a guarantee that the state lies inside an ellipse
