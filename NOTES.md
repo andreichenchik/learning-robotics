@@ -1,6 +1,6 @@
 # Teaching notes
 
-- Язык уроков и общения: русский; устоявшиеся английские термины указывать рядом при первом появлении.
+- Language: use English for all new lessons, reference material, terminology, UI copy, and teacher feedback. The learner may answer in Russian or English; evaluate the concepts independently of the response language.
 - Предпочтение: гибрид проектного и фундаментального обучения.
 - Формат объяснений: интуиция → модель/математика → код/эксперимент → границы применимости.
 - Уроки должны давать небольшой видимый результат и не предполагать фиксированного недельного расписания.
