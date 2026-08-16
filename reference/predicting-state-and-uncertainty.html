@@ -23,6 +23,9 @@
       <div><strong>Q</strong>Adds uncertainty from imperfect motion.</div>
     </div>
 
+    <h2>Initialization</h2>
+    <p><span class="formula-inline">P₀</span> is an evidence-based initial assumption: derive it from placement or localization accuracy, sensor calibration, or the previous estimator's corrected covariance. Use larger variance when the initial state is poorly known.</p>
+
     <h2>Expanded covariance</h2>
     <div class="formula">P′pp = Ppp + 2Δt Ppv + Δt² Pvv + Qpp<br>P′pv = Ppv + Δt Pvv + Qpv<br>P′vv = Pvv + Qvv</div>
 

@@ -19,7 +19,11 @@
     <h2>1. Start with one concrete robot</h2>
     <p>At time <span class="formula-inline">k</span>, a robot is estimated to be at <span class="formula-inline">0 m</span>, moving at <span class="formula-inline">1 m/s</span>. Position is known fairly well, but velocity is less certain:</p>
     <div class="formula">x̂ₖ = [ position ] = [ 0 ]<br>     [ velocity ]   [ 1 ]<br><br>Pₖ = [ 0.01   0    ]<br>     [ 0      0.09 ]</div>
-    <p>The standard deviations are <span class="formula-inline">σp=0.1 m</span> and <span class="formula-inline">σv=0.3 m/s</span>. Zero off-diagonal covariance means the initial position and velocity errors have no linear coupling.</p>
+    <p>These covariance values are <strong>chosen initial assumptions for this experiment</strong>, not facts discovered by the filter. Because the diagonal entries are variances, their square roots give <span class="formula-inline">σp=√0.01=0.1 m</span> and <span class="formula-inline">σv=√0.09=0.3 m/s</span>. Setting the off-diagonal terms to zero is another simplifying assumption: the initial position and velocity errors have no linear coupling.</p>
+
+    <section class="card note">
+      <strong>Where a real P₀ comes from.</strong> Initial position uncertainty might come from how accurately the robot was placed or localized; velocity uncertainty might come from encoder calibration and timing. If a previous filter step exists, its corrected <span class="formula-inline">P⁺</span> becomes the next starting covariance. When initialization is poorly known, choose a larger <span class="formula-inline">P₀</span> rather than claiming false confidence.
+    </section>
 
     <h2>2. Predict the mean</h2>
     <p>For one second of constant-velocity motion:</p>
