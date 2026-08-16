@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0008: Predicting State and Uncertainty</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=8">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0008 · 30 minutes</p>
+    <h1>Prediction moves uncertainty</h1>
+    <p class="lede">A robot's motion model predicts not only where it will be, but also how uncertainty in one state variable spreads into another.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will perform one position–velocity prediction, explain why uncertain velocity creates uncertain position, and distinguish propagated uncertainty from new process noise <span class="formula-inline">Q</span>.
+    </section>
+
+    <h2>1. Start with one concrete robot</h2>
+    <p>At time <span class="formula-inline">k</span>, a robot is estimated to be at <span class="formula-inline">0 m</span>, moving at <span class="formula-inline">1 m/s</span>. Position is known fairly well, but velocity is less certain:</p>
+    <div class="formula">x̂ₖ = [ position ] = [ 0 ]<br>     [ velocity ]   [ 1 ]<br><br>Pₖ = [ 0.01   0    ]<br>     [ 0      0.09 ]</div>
+    <p>The standard deviations are <span class="formula-inline">σp=0.1 m</span> and <span class="formula-inline">σv=0.3 m/s</span>. Zero off-diagonal covariance means the initial position and velocity errors have no linear coupling.</p>
+
+    <h2>2. Predict the mean</h2>
+    <p>For one second of constant-velocity motion:</p>
+    <div class="formula">positionₖ₊₁ = positionₖ + velocityₖ Δt<br>velocityₖ₊₁ = velocityₖ</div>
+    <p>In matrix form:</p>
+    <div class="formula">x̂⁻ₖ₊₁ = F x̂⁺ₖ<br><br>F = [ 1   Δt ]<br>    [ 0    1  ]</div>
+    <p>With <span class="formula-inline">Δt=1 s</span>, the predicted mean is <span class="formula-inline">(1 m, 1 m/s)</span>. The superscript minus marks a prediction made before the next measurement.</p>
+
+    <h2>3. Now predict the covariance</h2>
+    <div class="formula">P⁻ₖ₊₁ = F P⁺ₖ Fᵀ + Q</div>
+    <p>First set <span class="formula-inline">Q=0</span> to isolate what the known motion model does:</p>
+    <div class="formula">P⁻ₖ₊₁ = [ 0.10   0.09 ]<br>         [ 0.09   0.09 ]</div>
+    <p>Position variance grew from <span class="formula-inline">0.01</span> to <span class="formula-inline">0.10 m²</span>. Why? Possible robots that were slightly faster moved farther; slower ones fell behind. The same velocity error now causes a position error, creating positive position–velocity covariance.</p>
+
+    <div class="rule-grid">
+      <div><strong>F P Fᵀ</strong>Moves uncertainty already present in the previous estimate through the model.</div>
+      <div><strong>Q</strong>Adds fresh uncertainty caused by motion the model cannot predict exactly.</div>
+      <div><strong>P⁻</strong>Summarizes both effects before the next sensor correction.</div>
+    </div>
+
+    <p class="source">Primary source: <a href="https://www.roboticsbook.org/S42_logistics_actions.html"><em>Introduction to Robotics and Perception, 4.2: Moving in 2D</em></a> introduces the linear motion model <span class="formula-inline">xₖ₊₁=Axₖ+Buₖ+wₖ</span> and uses <span class="formula-inline">Q</span> for motion-model covariance.</p>
+
+    <h2>4. Where process noise Q comes from</h2>
+    <p>The model says velocity remains constant. A physical robot may accelerate slightly because of wheel slip, a slope, or imperfect actuation. If the unknown acceleration during one interval has standard deviation <span class="formula-inline">σa</span>, its covariance contribution is:</p>
+    <div class="formula">G = [ ½Δt² ]       Q = G σa² Gᵀ<br>    [   Δt  ]</div>
+    <p>The same unknown acceleration changes both position and velocity, so <span class="formula-inline">Q</span> itself has off-diagonal terms. In practice, engineers estimate noise scales from repeated experiments, actuator specifications, and whether the filter's predictions match observed innovations.</p>
+
+    <h2>5. Interactive lab</h2>
+    <section class="card simulator">
+      <canvas class="prediction-canvas" data-prediction-canvas aria-label="Possible position and velocity states after repeated motion predictions"></canvas>
+      <div class="legend">
+        <span><i class="mean-cross"></i>Predicted mean</span>
+        <span><i class="sample-dot faster"></i>Faster possibilities</span>
+        <span><i class="sample-dot slower"></i>Slower possibilities</span>
+      </div>
+
+      <div class="controls">
+        <label>
+          <span>Time step Δt: <output data-prediction-time-step-output>1.00</output> s</span>
+          <input data-prediction-time-step type="range" min="0.25" max="1" value="1" step="0.25">
+        </label>
+        <label>
+          <span>Initial velocity σv: <output data-prediction-velocity-standard-deviation-output>0.30</output> m/s</span>
+          <input data-prediction-velocity-standard-deviation type="range" min="0.05" max="0.60" value="0.30" step="0.05">
+        </label>
+        <label>
+          <span>Process acceleration σa: <output data-prediction-acceleration-standard-deviation-output>0.00</output> m/s²</span>
+          <input data-prediction-acceleration-standard-deviation type="range" min="0" max="0.50" value="0" step="0.05">
+        </label>
+      </div>
+
+      <div class="buttons">
+        <button data-prediction-step-button type="button">Predict one step</button>
+        <button data-prediction-five-button type="button">Predict five steps</button>
+        <button data-prediction-reset class="secondary" type="button">Reset</button>
+      </div>
+
+      <div class="covariance-matrix" aria-label="Current position and velocity covariance matrix">
+        <span>P =</span>
+        <span class="matrix-bracket">[</span>
+        <span data-prediction-xx>0.010</span>
+        <span data-prediction-xy-a>0.000</span>
+        <span data-prediction-xy-b>0.000</span>
+        <span data-prediction-yy>0.090</span>
+        <span class="matrix-bracket">]</span>
+        <span></span>
+      </div>
+      <p class="muted small matrix-units"><span class="formula-inline">Ppp</span>: m² · <span class="formula-inline">Ppv</span>: m²/s · <span class="formula-inline">Pvv</span>: (m/s)²</p>
+
+      <div class="readout prediction-readout">
+        <div>Prediction step<strong data-prediction-step>0</strong></div>
+        <div>Mean (p, v)<strong data-prediction-mean>(0.00 m, 1.00 m/s)</strong></div>
+        <div>Analytic position σ<strong data-prediction-position-standard-deviation>0.100 m</strong></div>
+        <div>Sample position σ<strong data-prediction-empirical-standard-deviation>0.100 m</strong></div>
+        <div>Correlation ρpv<strong data-prediction-correlation>0.00</strong></div>
+      </div>
+      <p class="muted small" data-prediction-status aria-live="polite">Predict one step and watch faster possibilities move ahead.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Keep <span class="formula-inline">σa=0</span> and predict one step. Verify the numerical covariance from section 3.</li>
+      <li>Predict four more steps. Explain why <span class="formula-inline">Pvv</span> stays constant while <span class="formula-inline">Ppp</span> and <span class="formula-inline">Ppv</span> grow.</li>
+      <li>Reset, increase initial <span class="formula-inline">σv</span>, and predict five steps. Compare the analytic position spread with the sample cloud.</li>
+      <li>Set <span class="formula-inline">σa&gt;0</span>. Now explain why velocity uncertainty also grows at every prediction.</li>
+    </ol>
+
+    <section class="card note">
+      <strong>The dots are not stored by the filter.</strong> They make the belief visible. The analytic filter stores only the mean vector and covariance matrix; the close agreement between analytic and sample spread validates the propagation formula.
+    </section>
+
+    <h2>6. Expanded formula for this model</h2>
+    <div class="formula">P′pp = Ppp + 2Δt Ppv + Δt² Pvv + Qpp<br>P′pv = Ppv + Δt Pvv + Qpv<br>P′vv = Pvv + Qvv</div>
+    <p>This reveals the mechanism directly: velocity variance <span class="formula-inline">Pvv</span> enters future position variance multiplied by <span class="formula-inline">Δt²</span>, and it creates position–velocity covariance multiplied by <span class="formula-inline">Δt</span>.</p>
+
+    <h2>7. Model boundary</h2>
+    <p>This lesson uses a linear constant-velocity model and Gaussian noise. Real wheel slip can be asymmetric or state-dependent, and robot pose dynamics are nonlinear. The same predict structure remains, but later localization will need local linearization or a different representation.</p>
+
+    <h2>8. Check from memory</h2>
+    <form class="card quiz" data-quiz data-correct="propagated" data-empty="Choose an answer first." data-success="Correct: FPFᵀ propagates uncertainty already present." data-retry="Separate existing uncertainty from newly injected process noise.">
+      <fieldset>
+        <legend>What does FPFᵀ represent?</legend>
+        <label><input type="radio" name="q1" value="propagated"> Previously present uncertainty after motion</label>
+        <label><input type="radio" name="q1" value="measurement"> Newly received uncertainty from measurement</label>
+        <label><input type="radio" name="q1" value="process"> Newly created uncertainty from process</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <form class="card quiz" data-quiz data-correct="process" data-empty="Choose an answer first." data-success="Correct: Q represents motion-model uncertainty added this step." data-retry="Ask which term remains even when the previous P is zero.">
+      <fieldset>
+        <legend>What does Q add during prediction?</legend>
+        <label><input type="radio" name="q2" value="process"> Fresh uncertainty from imperfect motion</label>
+        <label><input type="radio" name="q2" value="history"> Stored errors from previous measurements</label>
+        <label><input type="radio" name="q2" value="truth"> Exact displacement from hidden ground-truth</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>9. Your short report</h2>
+    <ol class="steps">
+      <li>With <span class="formula-inline">Q=0</span>, why can position uncertainty grow even though no new uncertainty is added?</li>
+      <li>Why does uncertain velocity create positive covariance between position and velocity after moving forward?</li>
+      <li>What physical effects could be represented by <span class="formula-inline">Q</span> for a wheeled robot?</li>
+    </ol>
+    <p>Answer in English or Russian through chat. Ask me about any step that remains unclear. Next, we will use predicted covariance and measurement covariance <span class="formula-inline">R</span> to derive the Kalman gain.</p>
+
+    <section class="card">
+      <strong>For review:</strong> use the <a href="../reference/predicting-state-and-uncertainty.html">prediction and process noise cheat sheet</a>. Revisit <a href="0007-uncertainty-and-covariance.html">uncertainty and covariance</a> if the entries of <span class="formula-inline">P</span> feel unfamiliar.
+    </section>
+
+    <footer>
+      Source: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S42_logistics_actions.html"><em>Introduction to Robotics and Perception: Moving in 2D</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/covariance.js"></script>
+  <script src="../assets/linear-prediction.js"></script>
+  <script src="../assets/prediction-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: Predicting State and Uncertainty</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=8">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>Prediction and process noise</h1>
+    <p class="lede">Move the estimated mean and covariance through a linear motion model.</p>
+
+    <h2>Position–velocity model</h2>
+    <div class="formula">x = [ position ]       F = [ 1   Δt ]<br>    [ velocity ]           [ 0    1  ]</div>
+
+    <h2>Prediction</h2>
+    <div class="formula">x̂⁻ₖ₊₁ = F x̂⁺ₖ<br>P⁻ₖ₊₁ = F P⁺ₖ Fᵀ + Q</div>
+    <div class="rule-grid">
+      <div><strong>F</strong>Maps the previous state into the next state.</div>
+      <div><strong>F P Fᵀ</strong>Propagates uncertainty already present.</div>
+      <div><strong>Q</strong>Adds uncertainty from imperfect motion.</div>
+    </div>
+
+    <h2>Expanded covariance</h2>
+    <div class="formula">P′pp = Ppp + 2Δt Ppv + Δt² Pvv + Qpp<br>P′pv = Ppv + Δt Pvv + Qpv<br>P′vv = Pvv + Qvv</div>
+
+    <h2>Unknown acceleration model</h2>
+    <div class="formula">G = [ ½Δt² ]<br>    [   Δt  ]<br><br>Q = G σa² Gᵀ</div>
+    <p>One unknown acceleration affects both position and velocity, so its process covariance contains off-diagonal terms.</p>
+
+    <section class="card note">
+      <strong>Recursive summary.</strong> The filter does not store a cloud or every previous error. The pair <span class="formula-inline">(x̂⁺, P⁺)</span> contains what the next prediction needs.
+    </section>
+
+    <section class="card note">
+      <strong>Model boundary.</strong> This form is exact for linear dynamics with additive noise. Nonlinear pose motion requires a locally linear approximation or another propagation method.
+    </section>
+
+    <footer>
+      Related lessons: <a href="../lessons/0008-predicting-state-and-uncertainty.html">Prediction moves uncertainty</a> and <a href="../lessons/0007-uncertainty-and-covariance.html">Uncertainty has shape</a>. Primary source: <a href="https://www.roboticsbook.org/S42_logistics_actions.html">Dellaert &amp; Hutchinson, Moving in 2D</a>.
+    </footer>
+  </main>
+</body>
+</html>
