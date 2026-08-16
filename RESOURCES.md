@@ -14,6 +14,8 @@
   Official documentation for an open 3D simulator with Python and macOS support. Use it when moving from custom small models to ready-made robots and physics.
 - [ROS 2 Lyrical Documentation](https://docs.ros.org/en/lyrical/)
   The official description of ROS 2 and its communication model. Use it only when projects require multiple interacting components and a standard robotics stack.
+- [WPILib: Pose Estimators](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html)
+  Practical documentation for combining periodic drivetrain odometry with occasional field-relative pose measurements. Use it for pose-fusion architecture, latency compensation, and measurement-trust tuning.
 
 ## Wisdom (Communities)
 

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 0006: External Pose Corrections</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=6">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · lesson 0006 · 30 minutes</p>
+    <h1>External pose corrections</h1>
+    <p class="lede">Odometry follows rapid local motion but drifts. An occasional world-referenced measurement can pull its estimate back—while also injecting measurement noise.</p>
+
+    <section class="card goal">
+      <strong>Outcome.</strong> You will apply one predict–correct cycle, tune a correction weight, and explain why trusting either odometry or an absolute sensor completely can fail.
+    </section>
+
+    <h2>1. Two imperfect sources</h2>
+    <p>Wheel odometry predicts how pose changes from one instant to the next. Because it integrates increments, its errors accumulate. A camera observing known markers, motion capture, or another localization system can instead produce a pose in the world frame. That measurement does not accumulate encoder drift, but each reading is noisy.</p>
+
+    <div class="rule-grid">
+      <div><strong>Odometry</strong>Frequent and locally smooth; its error grows over time.</div>
+      <div><strong>Absolute pose</strong>Anchored to the world; individual readings can jump.</div>
+      <div><strong>Combined estimate</strong>Predict continuously; correct when a measurement arrives.</div>
+    </div>
+
+    <p class="source">Robotics example: <a href="https://www.roboticsbook.org/S73_drone_sensing.html"><em>Introduction to Robotics and Perception, 7.3: Sensing for Drones</em></a> contrasts high-frequency relative motion with lower-frequency absolute pose measurements.</p>
+
+    <h2>2. Predict, compare, correct</h2>
+    <div class="loop" aria-label="Pose estimation cycle">
+      <div>Wheel increments</div>
+      <div>Predict q̂⁻</div>
+      <div>Measure z</div>
+      <div>Correct q̂⁺</div>
+    </div>
+    <p>The superscript minus denotes the prediction before using the new external measurement. The superscript plus denotes the corrected estimate.</p>
+
+    <div class="formula">innovation = z − q̂⁻<br>q̂⁺ = q̂⁻ + α · innovation</div>
+    <p>The <strong>innovation</strong> is new information: the discrepancy between what the external sensor reports and what odometry predicted. The correction weight <span class="formula-inline">α</span> decides how much of that discrepancy to apply.</p>
+
+    <h2>3. The weight expresses trust</h2>
+    <div class="rule-grid">
+      <div><strong>α = 0</strong>Ignore the measurement. The estimate remains pure odometry.</div>
+      <div><strong>0 &lt; α &lt; 1</strong>Move partway toward the measurement.</div>
+      <div><strong>α = 1</strong>Accept the measurement completely, including its noise.</div>
+    </div>
+    <p>A small weight produces smoother motion but corrects drift slowly. A large weight removes drift quickly but makes the estimate follow noisy readings. A fixed <span class="formula-inline">α</span> is a deliberate simplification; later, uncertainty will determine the weight.</p>
+
+    <h2>4. Angles need wrapped differences</h2>
+    <p>Position coordinates can be subtracted directly. Heading cannot: <span class="formula-inline">179°</span> and <span class="formula-inline">−179°</span> are only <span class="formula-inline">2°</span> apart, not <span class="formula-inline">358°</span>.</p>
+    <div class="formula">eθ = wrap(zθ − θ̂⁻)<br>θ̂⁺ = wrap(θ̂⁻ + α · eθ)</div>
+    <p>Always correct through the shortest signed angular difference.</p>
+
+    <h2>5. Interactive lab</h2>
+    <section class="card simulator">
+      <canvas class="pose-canvas" data-correction-canvas aria-label="Ground truth, corrected pose estimate, and external pose measurements"></canvas>
+      <div class="legend">
+        <span><i class="swatch truth"></i>Ground truth</span>
+        <span><i class="swatch estimate"></i>Corrected estimate</span>
+        <span><i class="swatch measurement"></i>External measurements</span>
+      </div>
+
+      <div class="controls single-control">
+        <label>
+          Correction weight α: <output data-correction-weight-output>0.25</output>
+          <input data-correction-weight type="range" min="0" max="1" value="0.25" step="0.05">
+        </label>
+      </div>
+
+      <div class="preset-grid scenario-grid">
+        <button data-scenario-precise type="button">Frequent, precise</button>
+        <button data-scenario-noisy type="button">Frequent, noisy</button>
+        <button data-scenario-rare type="button">Rare, precise</button>
+      </div>
+
+      <div class="buttons">
+        <button data-correction-run type="button">Run figure eight</button>
+        <button data-correction-pause class="secondary" type="button">Pause</button>
+        <button data-correction-reset class="secondary" type="button">Reset</button>
+      </div>
+
+      <div class="readout correction-readout">
+        <div>True pose<strong data-correction-truth>(-0.90, 0.00, 0°)</strong></div>
+        <div>Estimated pose<strong data-correction-estimate>(-0.90, 0.00, 0°)</strong></div>
+        <div>Position error<strong data-correction-position-error>0.000 m</strong></div>
+        <div>Heading error<strong data-correction-heading-error>0.0°</strong></div>
+        <div>Corrections applied<strong data-correction-count>0</strong></div>
+        <div>Last position shift<strong data-correction-shift>—</strong></div>
+      </div>
+      <p class="muted small"><strong>Scenario:</strong> <span data-measurement-scenario>Frequent, noisy measurements</span>. The odometry always has a +4% right-encoder bias.</p>
+      <p class="muted small" data-correction-status aria-live="polite">Choose a measurement scenario, then run the figure eight.</p>
+    </section>
+
+    <ol class="steps">
+      <li>Select <strong>Frequent, noisy</strong>, set <span class="formula-inline">α=0</span>, and run. Why do the orange measurements have no effect?</li>
+      <li>Keep the same scenario, set <span class="formula-inline">α=1</span>, and run again. Watch the blue estimate jump to every orange measurement.</li>
+      <li>Set <span class="formula-inline">α=0.25</span> and rerun. Compare its drift and path smoothness with both extremes.</li>
+      <li>Select <strong>Rare, precise</strong>. What happens between two corrections even though each measurement is accurate?</li>
+    </ol>
+
+    <section class="card note">
+      <strong>Read the latest correction.</strong> The grey outline is <span class="formula-inline">q̂⁻</span>, the orange cross is <span class="formula-inline">z</span>, and the blue segment ends at <span class="formula-inline">q̂⁺</span>. Its length is <span class="formula-inline">α</span> times the position innovation.
+    </section>
+
+    <h2>6. What this model leaves out</h2>
+    <p>Real pose estimators do not normally use one arbitrary, fixed weight for every coordinate and every measurement. They track uncertainty, can assign different trust to position and heading, compensate for sensor latency, and reject implausible measurements.</p>
+    <p class="source">Primary practical source: <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html"><em>WPILib: Pose Estimators</em></a>. It shows production estimators combining periodic odometry with occasional field-relative pose measurements and tuning their relative trust through measurement uncertainty.</p>
+
+    <h2>7. Check from memory</h2>
+    <form class="card quiz" data-quiz data-correct="measurement" data-empty="Choose an answer first." data-success="Correct: α controls how much innovation changes the estimate." data-retry="Separate estimator trust from robot motion and sensor timing.">
+      <fieldset>
+        <legend>What does the correction weight α control?</legend>
+        <label><input type="radio" name="q1" value="measurement"> How strongly the measurement corrects</label>
+        <label><input type="radio" name="q1" value="acceleration"> How quickly the robot accelerates</label>
+        <label><input type="radio" name="q1" value="frequency"> How often the encoder updates</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <form class="card quiz" data-quiz data-correct="wrapped" data-empty="Choose an answer first." data-success="Correct: headings must be compared through their shortest wrapped difference." data-retry="Remember that +π and −π describe adjacent headings.">
+      <fieldset>
+        <legend>How should two headings be compared near ±π?</legend>
+        <label><input type="radio" name="q2" value="wrapped"> Use the shortest wrapped difference</label>
+        <label><input type="radio" name="q2" value="average"> Average the raw angle numbers</label>
+        <label><input type="radio" name="q2" value="discard"> Discard the measured heading completely</label>
+      </fieldset>
+      <button type="submit">Check</button>
+      <p class="quiz-result" data-quiz-result aria-live="polite"></p>
+    </form>
+
+    <h2>8. Your short report</h2>
+    <ol class="steps">
+      <li>Why does <span class="formula-inline">α=0</span> preserve drift even when accurate external measurements arrive?</li>
+      <li>Why can <span class="formula-inline">α=1</span> make the estimated trajectory visibly noisy?</li>
+      <li>Why can no single fixed <span class="formula-inline">α</span> be optimal for every sensor and situation?</li>
+    </ol>
+    <p>Answer in English or Russian through chat. Ask me about any step or visual that remains unclear. After your reasoning is confirmed, we can derive how uncertainty replaces the hand-tuned weight.</p>
+
+    <section class="card">
+      <strong>For review:</strong> use the <a href="../reference/external-pose-corrections.html">external pose corrections cheat sheet</a>. Revisit <a href="0004-odometry-and-drift.html">odometry and drift</a> if the prediction step feels unclear.
+    </section>
+
+    <footer>
+      Sources: Dellaert &amp; Hutchinson, <a href="https://www.roboticsbook.org/S73_drone_sensing.html"><em>Introduction to Robotics and Perception: Sensing for Drones</em></a>; <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html"><em>WPILib: Pose Estimators</em></a>.
+    </footer>
+  </main>
+  <script src="../assets/odometry.js"></script>
+  <script src="../assets/pose-correction.js"></script>
+  <script src="../assets/pose-correction-simulator.js"></script>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

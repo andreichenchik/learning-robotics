@@ -122,6 +122,7 @@ code, .formula { font-family: "SFMono-Regular", Consolas, monospace; }
   gap: 1rem 1.5rem;
   margin-top: 1.2rem;
 }
+.controls.single-control { grid-template-columns: minmax(0, 1fr); }
 
 label { display: grid; gap: .35rem; font-weight: 650; }
 input[type="range"] { width: 100%; accent-color: var(--green); }
@@ -151,12 +152,14 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
 .readout strong { display: block; font-size: 1.15rem; }
 .readout.pose-readout { grid-template-columns: repeat(4, 1fr); }
 .readout.odometry-readout { grid-template-columns: repeat(3, 1fr); }
+.readout.correction-readout { grid-template-columns: repeat(3, 1fr); }
 
 .legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .8rem 0 0; }
 .legend span { display: inline-flex; align-items: center; gap: .4rem; }
 .swatch { width: 2rem; border-top: 3px solid; }
 .swatch.truth { border-color: var(--green); }
 .swatch.estimate { border-color: var(--blue); border-top-style: dashed; }
+.swatch.measurement { border-color: var(--amber); border-top-style: dotted; }
 
 .preset-grid {
   display: grid;
@@ -165,6 +168,7 @@ button:focus-visible { outline: 3px solid #9dcfb7; outline-offset: 3px; }
   margin: 1rem 0;
 }
 .preset-grid button { border-color: var(--line); background: var(--panel); color: var(--ink); }
+.preset-grid.scenario-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .data-table-wrap { overflow-x: auto; margin-top: 1rem; }
 .data-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -199,7 +203,8 @@ footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line
   .loop { grid-template-columns: 1fr 1fr; }
   .loop div:nth-child(2)::after { content: "↓"; right: 50%; bottom: -.95rem; top: auto; }
   .loop div:nth-child(3)::after { content: "←"; right: auto; left: -.7rem; }
-  .controls, .readout, .readout.pose-readout, .readout.odometry-readout { grid-template-columns: 1fr; }
+  .controls, .readout, .readout.pose-readout, .readout.odometry-readout,
+  .readout.correction-readout { grid-template-columns: 1fr; }
   .preset-grid, .rule-grid { grid-template-columns: 1fr; }
 }
 

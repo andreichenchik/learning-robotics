@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheat sheet: External pose corrections</title>
+  <link rel="stylesheet" href="../assets/styles.css?v=6">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Robotics · reference</p>
+    <h1>External pose corrections</h1>
+    <p class="lede">Combine a drifting prediction with an occasional world-referenced measurement.</p>
+
+    <h2>Predict</h2>
+    <div class="formula">q̂⁻ ← odometry_update(q̂, ΔsL, ΔsR)</div>
+    <p>The minus superscript marks the estimate before the new external measurement is applied.</p>
+
+    <h2>Compute the innovation</h2>
+    <div class="formula">ex = zx − x̂⁻<br>ey = zy − ŷ⁻<br>eθ = wrap(zθ − θ̂⁻)</div>
+    <p>The innovation is the discrepancy between the absolute measurement <span class="formula-inline">z</span> and the prediction.</p>
+
+    <h2>Correct</h2>
+    <div class="formula">x̂⁺ = x̂⁻ + αex<br>ŷ⁺ = ŷ⁻ + αey<br>θ̂⁺ = wrap(θ̂⁻ + αeθ)</div>
+
+    <div class="rule-grid">
+      <div><strong>α = 0</strong>Pure odometry; drift remains.</div>
+      <div><strong>0 &lt; α &lt; 1</strong>Partial correction; smoothness–drift tradeoff.</div>
+      <div><strong>α = 1</strong>Pure measurement at every correction.</div>
+    </div>
+
+    <section class="card note">
+      <strong>Model boundary.</strong> A fixed weight does not represent changing uncertainty, latency, outliers, or correlations. It prepares the predict–correct structure; a Kalman filter computes its gain from uncertainty.
+    </section>
+
+    <footer>
+      Related lessons: <a href="../lessons/0006-external-pose-corrections.html">External pose corrections</a> and <a href="../lessons/0004-odometry-and-drift.html">Odometry and drift</a>.
+    </footer>
+  </main>
+</body>
+</html>
