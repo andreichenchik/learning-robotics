@@ -9,3 +9,4 @@
 - Current direction: finish state-estimation foundations in five short lessons—uncertainty and covariance, uncertainty prediction, Kalman gain, the complete Kalman filter, and robot localization—before switching domains.
 - Feedback after lesson 0007: covariance felt too abstract. Future estimation lessons should begin with one concrete robot state and a numerical predict–measure example before introducing matrix notation or geometric interpretation.
 - After the five-lesson state-estimation sequence, transition to practical tasks in which the learner writes the main code and receives requirements, tests, and feedback rather than another sequence of prepared simulators.
+- Do not ask the learner to choose technical presentation implementations such as math-rendering technology. Own those decisions and use consistent, readable, reusable visual components across lessons.

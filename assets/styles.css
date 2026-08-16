@@ -106,6 +106,39 @@ code, .formula { font-family: "SFMono-Regular", Consolas, monospace; }
   font-size: 1.02rem;
 }
 
+.equation {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-width: max-content;
+}
+.equation + .equation { margin-top: 1rem; }
+.math-matrix {
+  position: relative;
+  display: inline-block;
+  padding: .25rem .75rem;
+  vertical-align: middle;
+}
+.math-matrix::before, .math-matrix::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: .35rem;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+.math-matrix::before { left: 0; border-left: 2px solid currentColor; }
+.math-matrix::after { right: 0; border-right: 2px solid currentColor; }
+.math-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--matrix-columns, 2), minmax(2ch, max-content));
+  gap: .2rem 1rem;
+  justify-items: end;
+  align-items: center;
+}
+.math-matrix-grid.labels { justify-items: start; }
+
 .simulator canvas {
   display: block;
   width: 100%;
@@ -253,6 +286,10 @@ footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line
   .simulator canvas.covariance-canvas { height: 340px; }
   .simulator canvas.prediction-canvas { height: 360px; }
   .covariance-matrix { grid-template-columns: auto auto 3.8rem 3.8rem auto auto; gap: .1rem .35rem; }
+  .formula { padding: .9rem 1rem; }
+  .equation { gap: .5rem; }
+  .math-matrix { padding-inline: .6rem; }
+  .math-matrix-grid { gap: .15rem .65rem; }
 }
 
 @media print {

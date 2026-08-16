@@ -13,7 +13,14 @@
     <p class="lede">Move the estimated mean and covariance through a linear motion model.</p>
 
     <h2>Position–velocity model</h2>
-    <div class="formula">x = [ position ]       F = [ 1   Δt ]<br>    [ velocity ]           [ 0    1  ]</div>
+    <div class="formula">
+      <div class="equation">
+        <span>x =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>position</span><span>velocity</span></span></span>
+        <span>F =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>1</span><span>Δt</span><span>0</span><span>1</span></span></span>
+      </div>
+    </div>
 
     <h2>Prediction</h2>
     <div class="formula">x̂⁻ₖ₊₁ = F x̂⁺ₖ<br>P⁻ₖ₊₁ = F P⁺ₖ Fᵀ + Q</div>
@@ -30,7 +37,13 @@
     <div class="formula">P′pp = Ppp + 2Δt Ppv + Δt² Pvv + Qpp<br>P′pv = Ppv + Δt Pvv + Qpv<br>P′vv = Pvv + Qvv</div>
 
     <h2>Unknown acceleration model</h2>
-    <div class="formula">G = [ ½Δt² ]<br>    [   Δt  ]<br><br>Q = G σa² Gᵀ</div>
+    <div class="formula">
+      <div class="equation">
+        <span>G =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>½Δt²</span><span>Δt</span></span></span>
+      </div>
+      <div class="equation"><span>Q = G σa² Gᵀ</span></div>
+    </div>
     <p>One unknown acceleration affects both position and velocity, so its process covariance contains off-diagonal terms.</p>
 
     <section class="card note">

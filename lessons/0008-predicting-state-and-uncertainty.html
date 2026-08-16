@@ -18,7 +18,18 @@
 
     <h2>1. Start with one concrete robot</h2>
     <p>At time <span class="formula-inline">k</span>, a robot is estimated to be at <span class="formula-inline">0 m</span>, moving at <span class="formula-inline">1 m/s</span>. Position is known fairly well, but velocity is less certain:</p>
-    <div class="formula">x̂ₖ = [ position ] = [ 0 ]<br>     [ velocity ]   [ 1 ]<br><br>Pₖ = [ 0.01   0    ]<br>     [ 0      0.09 ]</div>
+    <div class="formula">
+      <div class="equation">
+        <span>x̂ₖ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid labels" style="--matrix-columns: 1"><span>position</span><span>velocity</span></span></span>
+        <span>=</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>0</span><span>1</span></span></span>
+      </div>
+      <div class="equation">
+        <span>Pₖ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>0.01</span><span>0</span><span>0</span><span>0.09</span></span></span>
+      </div>
+    </div>
     <p>These covariance values are <strong>chosen initial assumptions for this experiment</strong>, not facts discovered by the filter. Because the diagonal entries are variances, their square roots give <span class="formula-inline">σp=√0.01=0.1 m</span> and <span class="formula-inline">σv=√0.09=0.3 m/s</span>. Setting the off-diagonal terms to zero is another simplifying assumption: the initial position and velocity errors have no linear coupling.</p>
 
     <section class="card note">
@@ -29,13 +40,24 @@
     <p>For one second of constant-velocity motion:</p>
     <div class="formula">positionₖ₊₁ = positionₖ + velocityₖ Δt<br>velocityₖ₊₁ = velocityₖ</div>
     <p>In matrix form:</p>
-    <div class="formula">x̂⁻ₖ₊₁ = F x̂⁺ₖ<br><br>F = [ 1   Δt ]<br>    [ 0    1  ]</div>
+    <div class="formula">
+      <div class="equation"><span>x̂⁻ₖ₊₁ = F x̂⁺ₖ</span></div>
+      <div class="equation">
+        <span>F =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>1</span><span>Δt</span><span>0</span><span>1</span></span></span>
+      </div>
+    </div>
     <p>With <span class="formula-inline">Δt=1 s</span>, the predicted mean is <span class="formula-inline">(1 m, 1 m/s)</span>. The superscript minus marks a prediction made before the next measurement.</p>
 
     <h2>3. Now predict the covariance</h2>
     <div class="formula">P⁻ₖ₊₁ = F P⁺ₖ Fᵀ + Q</div>
     <p>First set <span class="formula-inline">Q=0</span> to isolate what the known motion model does:</p>
-    <div class="formula">P⁻ₖ₊₁ = [ 0.10   0.09 ]<br>         [ 0.09   0.09 ]</div>
+    <div class="formula">
+      <div class="equation">
+        <span>P⁻ₖ₊₁ =</span>
+        <span class="math-matrix"><span class="math-matrix-grid"><span>0.10</span><span>0.09</span><span>0.09</span><span>0.09</span></span></span>
+      </div>
+    </div>
     <p>Position variance grew from <span class="formula-inline">0.01</span> to <span class="formula-inline">0.10 m²</span>. Why? Possible robots that were slightly faster moved farther; slower ones fell behind. The same velocity error now causes a position error, creating positive position–velocity covariance.</p>
 
     <div class="rule-grid">
@@ -48,7 +70,13 @@
 
     <h2>4. Where process noise Q comes from</h2>
     <p>The model says velocity remains constant. A physical robot may accelerate slightly because of wheel slip, a slope, or imperfect actuation. If the unknown acceleration during one interval has standard deviation <span class="formula-inline">σa</span>, its covariance contribution is:</p>
-    <div class="formula">G = [ ½Δt² ]       Q = G σa² Gᵀ<br>    [   Δt  ]</div>
+    <div class="formula">
+      <div class="equation">
+        <span>G =</span>
+        <span class="math-matrix"><span class="math-matrix-grid" style="--matrix-columns: 1"><span>½Δt²</span><span>Δt</span></span></span>
+        <span>Q = G σa² Gᵀ</span>
+      </div>
+    </div>
     <p>The same unknown acceleration changes both position and velocity, so <span class="formula-inline">Q</span> itself has off-diagonal terms. In practice, engineers estimate noise scales from repeated experiments, actuator specifications, and whether the filter's predictions match observed innovations.</p>
 
     <h2>5. Interactive lab</h2>
